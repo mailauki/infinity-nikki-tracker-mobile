@@ -1,0 +1,17 @@
+# Xcode
+*.xcuserstate
+xcuserdata/
+*.xcworkspace/xcuserdata/
+DerivedData/
+
+# macOS
+.DS_Store
+*.swp
+
+# Swift Package Manager
+.build/
+.swiftpm/
+
+# Secrets — never commit
+Secrets.xcconfig
+Secrets.swift
