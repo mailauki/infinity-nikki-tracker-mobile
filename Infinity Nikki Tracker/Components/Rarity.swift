@@ -17,6 +17,7 @@ struct Rarity: View {
                     .resizable()
                     .frame(width: 15, height: 15)
                     .rotationEffect(.degrees(15))
+                    
             }
             .foregroundStyle(Color.themeSecondary)
         }

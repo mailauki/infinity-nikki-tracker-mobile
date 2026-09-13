@@ -79,8 +79,8 @@ struct ColorTestView: View {
                         
                         Chip(label: "Test Chip")
                         
-                        CheckToggle(label: "Test", isChecked: true)
-                        CheckToggle(label: "Test", isChecked: false)
+                        CheckToggle( isChecked: true)
+                        CheckToggle( isChecked: false)
                         
                         Rarity(rarity: 5)
                     }

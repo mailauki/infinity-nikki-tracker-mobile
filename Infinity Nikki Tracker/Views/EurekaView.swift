@@ -14,32 +14,54 @@ struct EurekaView: View {
     @State private var colors: [EurekaColor] = []
     @State private var isLoading = false
     @State private var errorMessage: String?
+    @State private var isGridView = false
     
     // MARK: - Constants
     
     let columns = [
-        GridItem(.flexible(), spacing: 20),
-        GridItem(.flexible(), spacing: 20)
+        GridItem(.flexible(), spacing: 10),
+        GridItem(.flexible(), spacing: 10)
     ]
     
     // MARK: - Body
 
     var body: some View {
         NavigationSplitView {
-            eurekaListView
-                .overlay {
-                    if isLoading && eurekaSets.isEmpty {
-                        ProgressView()
+            Group {
+                if isGridView {
+                    // Grid Layout View
+                    eurekaGridView
+                } else {
+                    // List Layout View
+                    eurekaListView
+                }
+            }
+            .overlay {
+                if isLoading && eurekaSets.isEmpty {
+                    ProgressView()
+                }
+            }
+            .task {
+                await fetchEureka()
+            }
+            .navigationTitle("Eureka")
+            .scrollContentBackground(.hidden)
+            .background(Color.themeSurface)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    // 5. Toggle Layout Button
+                    Button {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            isGridView.toggle()
+                        }
+                    } label: {
+                        Image(systemName: isGridView ? "list.bullet" : "square.grid.2x2")
+                            .font(.title3)
                     }
                 }
-                .task {
-                    await fetchEureka()
-                }
-                .navigationTitle("Eureka")
-                .scrollContentBackground(.hidden)
-                .background(Color.themeSurface)
+            }
 #if os(macOS)
-                .navigationSplitViewColumnWidth(min: 180, ideal: 200)
+            .navigationSplitViewColumnWidth(min: 180, ideal: 200)
 #endif
         } detail: {
             Text("Select a Eureka")
@@ -72,6 +94,22 @@ struct EurekaView: View {
                         EurekaDetail(eurekaSet: eurekaSet)
                     } label: {
                         EurekaSetCard(eurekaSet: eurekaSet)
+//                        SetCard(
+//                        media: {
+//                            CardParts.imageMedia(url: eurekaSet.imageURL ?? "")
+//                        },
+//                        content: {
+//                            CardParts.textContent(title: eurekaSet.title, subtitle: "elegant • yellow".uppercased(), rarity: eurekaSet.rarity ?? 0)
+//                            HStack {
+//                                Image(systemName: "circle.fill")
+//                                    .font(.caption2)
+//                                Text("8/8 complete")
+//                                    .font(.footnote)
+//                            }
+//                            .foregroundStyle(Color.themeSuccess)
+//                            .padding(.top, 6)
+//                        }
+//                    )
                     }
                 }
             }
@@ -88,20 +126,20 @@ struct EurekaView: View {
         isLoading = true
         errorMessage = nil
         defer { isLoading = false }
-        
+
         do {
-            eurekaSets = try await supabase.from("eureka_sets")
+            var sets: [EurekaSet] = try await supabase.from("eureka_sets")
                 .select(
                     """
                     id,
                     slug,
                     title,
+                    description,
                     rarity,
                     style,
                     label,
-                    description,
-                    created_at,
                     updated_at,
+                    eureka_set_trials ( trial ),
                     eureka_variants (
                         id,
                         slug,
@@ -109,9 +147,7 @@ struct EurekaView: View {
                         color,
                         category,
                         image_url,
-                        default,
-                        created_at,
-                        updated_at
+                        default
                     )
                     """
                 )
@@ -119,36 +155,68 @@ struct EurekaView: View {
                 .order("id", ascending: true, referencedTable: "eureka_variants")
                 .execute()
                 .value
-            
-            print("✅ Successfully loaded \(eurekaSets.count) eureka sets")
-            
+
+            print("✅ Successfully loaded \(sets.count) eureka sets")
+
+            if let user = try? await supabase.auth.session.user {
+                sets = await applyObtained(to: sets, userId: user.id)
+            }
+
+            eurekaSets = sets
+
             // Optionally fetch categories and colors if needed for filtering
             do {
                 categories = try await supabase.from("eureka_categories")
                     .select("slug, title, image_url")
                     .execute()
                     .value
-                
+
                 print("✅ Successfully loaded \(categories.count) categories")
             } catch {
                 print("⚠️ Failed to load categories (non-critical): \(error)")
             }
-            
+
             do {
                 colors = try await supabase.from("eureka_colors")
                     .select("slug, title, image_url")
                     .execute()
                     .value
-                
+
                 print("✅ Successfully loaded \(colors.count) colors")
             } catch {
                 print("⚠️ Failed to load colors (non-critical): \(error)")
             }
-            
+
         } catch {
             print("❌ Eureka fetch error:")
             dump(error)
             errorMessage = "Failed to fetch eureka sets: \(error.localizedDescription)"
+        }
+    }
+
+    private func applyObtained(to sets: [EurekaSet], userId: UUID) async -> [EurekaSet] {
+        do {
+            let obtainedRecords: [ObtainedEureka] = try await supabase
+                .from("obtained_eureka")
+                .select("id, eureka_set, category, color")
+                .eq("user_id", value: userId)
+                .execute()
+                .value
+
+            let obtainedKeys = Set(obtainedRecords.compactMap { record -> String? in
+                guard let es = record.eurekaSet, let cat = record.category, let col = record.color else { return nil }
+                return "\(es)|\(cat)|\(col)"
+            })
+
+            return sets.map { set in
+                set.withVariants(set.eurekaVariants.map { variant in
+                    let key = "\(variant.eurekaSet ?? "")|\(variant.category ?? "")|\(variant.color ?? "")"
+                    return variant.withObtained(obtainedKeys.contains(key))
+                })
+            }
+        } catch {
+            print("⚠️ Failed to load obtained data: \(error)")
+            return sets
         }
     }
 }

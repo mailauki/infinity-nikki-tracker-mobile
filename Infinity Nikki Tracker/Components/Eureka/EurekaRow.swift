@@ -42,7 +42,7 @@ struct EurekaRow: View {
             
             Spacer()
             
-            CheckToggle(label: "Obtained", isChecked: eurekaVariant.obtained ?? false)
+            CheckToggle(isChecked: eurekaVariant.obtained ?? false)
         }
     }
 }

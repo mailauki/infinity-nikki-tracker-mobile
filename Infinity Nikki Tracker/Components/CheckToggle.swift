@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct CheckToggle: View {
-    var label: String
+//    var label: String
     var isChecked: Bool = false
 
     var body: some View {
@@ -21,14 +21,29 @@ struct CheckToggle: View {
                     .foregroundColor(Color.themeOnSuccess)
                     .background(Color.themeSuccess)
                     .clipShape(Circle())
+                    .overlay(
+                            Circle()
+                                .strokeBorder(Color.themeTertiary, lineWidth: 1)
+                    )
             } else {
-                Image(systemName: "circle")
+                Image(systemName: "checkmark")
                     .font(.system(size: 16))
                     .bold()
                     .frame(width: 30, height: 30)
-                    .foregroundColor(Color.themeOnSuccess)
-                    .background(Color.themeSuccess.opacity(0.5))
+                    .foregroundColor(Color.themeOutlineVariant)
+                    .background(Color.themeSurface)
                     .clipShape(Circle())
+                    .overlay(
+                            Circle()
+                                .strokeBorder(Color.themeOutlineVariant, lineWidth: 1)
+                    )
+//                Image(systemName: "circle")
+//                    .font(.system(size: 16))
+//                    .bold()
+//                    .frame(width: 30, height: 30)
+//                    .foregroundColor(Color.themeOnSuccess)
+//                    .background(Color.themeSuccess.opacity(0.5))
+//                    .clipShape(Circle())
             }
         }
         .toggleStyle(.button)
@@ -38,6 +53,8 @@ struct CheckToggle: View {
 }
 
 #Preview {
-    CheckToggle(label: "Obtained", isChecked: true)
-    CheckToggle(label: "Not Obtained", isChecked: false)
+//    CheckToggle(label: "Obtained", isChecked: true)
+//    CheckToggle(label: "Not Obtained", isChecked: false)
+    CheckToggle(isChecked: true)
+    CheckToggle(isChecked: false)
 }

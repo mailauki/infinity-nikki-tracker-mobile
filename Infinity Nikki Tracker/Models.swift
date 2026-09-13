@@ -65,6 +65,10 @@ struct EurekaSet: Codable, Identifiable {
         return uniqueColors.map { EurekaColor(slug: $0, title: $0, imageURL: "") }
     }
     
+    func withVariants(_ variants: [EurekaVariant]) -> EurekaSet {
+        EurekaSet(id: id, slug: slug, title: title, rarity: rarity, style: style, label: label, description: description, createdAt: createdAt, updatedAt: updatedAt, eurekaVariants: variants)
+    }
+
     enum CodingKeys: String, CodingKey {
         case id, slug, title, rarity, style, label, description
         case createdAt = "created_at"
@@ -85,6 +89,10 @@ struct EurekaVariant: Codable, Identifiable {
     let updatedAt: String?
     var obtained: Bool?  // User-specific tracking
     
+    func withObtained(_ obtained: Bool) -> EurekaVariant {
+        EurekaVariant(id: id, slug: slug, eurekaSet: eurekaSet, category: category, color: color, imageURL: imageURL, isDefault: isDefault, createdAt: createdAt, updatedAt: updatedAt, obtained: obtained)
+    }
+
     enum CodingKeys: String, CodingKey {
         case id, slug, category, color, obtained
         case eurekaSet = "eureka_set"
