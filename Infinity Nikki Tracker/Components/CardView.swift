@@ -7,26 +7,50 @@
 
 import SwiftUI
 
-struct CardView: View {
-    let eurekaSet: EurekaSet
-    // TODO: add variants for OutfitSet and others
-    // TODO: add variants for sets vs pieces
+enum CardLayout {
+    case card, row
+}
 
-    private var total: Int { eurekaSet.eurekaVariants.count }
-    private var obtained: Int { eurekaSet.eurekaVariants.filter { $0.obtained == true }.count }
-    // obtained is nil on all variants until applyObtained runs (requires a logged-in user)
-    private var hasUserData: Bool { eurekaSet.eurekaVariants.contains { $0.obtained != nil } }
+struct CardView: View {
+    let item: any CardDisplayable
+    var layout: CardLayout = .card
+
+    private var obtained: Int { item.cardObtained }
+    private var total: Int { item.cardTotal }
+    private var hasUserData: Bool { item.cardHasUserData }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            CardMediaView(url: eurekaSet.imageURL ?? "", square: true)
-            CardContentView(title: eurekaSet.title, rarity: eurekaSet.rarity ?? 0, style: eurekaSet.style ?? "", label: eurekaSet.label ?? "", obtained: obtained, total: total, showProgress: hasUserData)
+        switch layout {
+        case .card: cardLayout
+        case .row:  rowLayout
         }
-        .overlay(alignment: .topTrailing) {
-            if hasUserData {
-                CheckToggle(isChecked: obtained == total && total > 0)
-                    .offset(x: -10, y: 10)
-            }
+    }
+
+    private var cardLayout: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            CardMediaView(url: item.cardImageURL ?? "", square: true)
+                .overlay(alignment: .topTrailing) {
+                    if hasUserData {
+                        CheckToggle(isChecked: obtained == total && total > 0)
+                            .offset(x: -10, y: 10)
+                    }
+                }
+            CardContentView(title: item.cardTitle, rarity: item.cardRarity, style: item.cardStyle, label: item.cardLabel, obtained: obtained, total: total, showProgress: hasUserData, layout: layout)
+        }
+    }
+
+    private var rowLayout: some View {
+        HStack(alignment: .top, spacing: 10) {
+            CardMediaView(url: item.cardImageURL ?? "", square: true)
+                .frame(width: 100)
+                .overlay(alignment: .topTrailing) {
+                    if hasUserData {
+                        CheckToggle(isChecked: obtained == total && total > 0)
+                            .offset(x: -2, y: 2)
+                    }
+                }
+            CardContentView(title: item.cardTitle, rarity: item.cardRarity, style: item.cardStyle, label: item.cardLabel, obtained: obtained, total: total, showProgress: hasUserData, layout: layout)
+                .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
 }
@@ -45,11 +69,14 @@ struct CardMediaView: View {
                         .frame(maxWidth: .infinity)
                 }
             case .success(let image):
-                image
-                    .resizable()
-                    .scaledToFit()
-                    .frame(maxWidth: .infinity)
-                    .clipped()
+                ZStack {
+                    Color(Color.themeSurfaceContainerLowest)
+                    image
+                        .resizable()
+                        .scaledToFit()
+                        .frame(maxWidth: .infinity)
+                        .clipped()
+                }
             case .failure:
                 ZStack {
                     Color(.systemGroupedBackground)
@@ -65,19 +92,18 @@ struct CardMediaView: View {
         .frame(maxWidth: .infinity)
         .clipShape(Rectangle())
         .border(Color.themeOutlineVariant, width: 1)
-        .overlay(Color.themeOutline.frame(height: 2), alignment: .bottom)
-        .padding(.bottom, 14)
     }
 }
 
 struct CardContentView: View {
     let title: String
-    let rarity: Int
+    let rarity: Int?
     let style: String
     let label: String
     let obtained: Int
     let total: Int
     let showProgress: Bool
+    let layout: CardLayout
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -87,14 +113,18 @@ struct CardContentView: View {
                 .foregroundColor(Color.themeOnSurface)
                 .lineLimit(1)
 
-            HStack {
-                HStack(spacing: 2) {
-                    Text(label.uppercased())
-                    Text("•")
-                    Text(style.uppercased())
+            Group {
+                if layout == .card {
+                    HStack {
+                        subtitleText
+                        Spacer()
+                        rarityText
+                    }
+                } else {
+                    subtitleText
+                    rarityText
+                    Spacer()
                 }
-                Spacer()
-                Text("\(rarity) ★")
             }
             .font(.caption)
             .foregroundColor(Color.themeSecondary)
@@ -103,15 +133,42 @@ struct CardContentView: View {
                 CompletionProgress(obtained: obtained, total: total)
             }
         }
+        .padding(.top, layout == .card ? 14 : 0)
+        .overlay(alignment: .top) {
+            if layout == .card {
+                Color.themeOutline.frame(height: 2)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var subtitleText: some View {
+        HStack(spacing: 2) {
+            if !label.isEmpty { Text(label.uppercased()) }
+            if !label.isEmpty && !style.isEmpty { Text("•") }
+            if !style.isEmpty { Text(style.uppercased()) }
+        }
+    }
+
+    @ViewBuilder
+    private var rarityText: some View {
+        if let rarity {
+            Text("\(rarity) ★")
+        }
     }
 }
 
 #Preview {
     ScrollView {
-        VStack {
-            CardView(eurekaSet: SeedData.eurekaSetComplete)
-            CardView(eurekaSet: SeedData.eurekaSetPartial)
-            CardView(eurekaSet: SeedData.eurekaSetEmpty)
+        VStack(spacing: 20) {
+            CardView(item: SeedData.eurekaSetComplete)
+            CardView(item: SeedData.eurekaSetPartial)
+            Divider()
+            CardView(item: SeedData.eurekaSetComplete, layout: .row)
+            CardView(item: SeedData.eurekaSetPartial, layout: .row)
+            Divider()
+            CardView(item: SeedData.variantJacket, layout: .row)
+            CardView(item: SeedData.variantHat, layout: .row)
         }
         .padding()
     }

@@ -182,6 +182,41 @@ struct EurekaSetTrial: Codable {
     }
 }
 
+// MARK: - CardDisplayable Protocol
+
+protocol CardDisplayable {
+    var cardImageURL: String? { get }
+    var cardTitle: String { get }
+    var cardLabel: String { get }
+    var cardStyle: String { get }
+    var cardRarity: Int? { get }
+    var cardObtained: Int { get }
+    var cardTotal: Int { get }
+    var cardHasUserData: Bool { get }
+}
+
+extension EurekaSet: CardDisplayable {
+    var cardImageURL: String? { imageURL }
+    var cardTitle: String { title }
+    var cardLabel: String { label ?? "" }
+    var cardStyle: String { style ?? "" }
+    var cardRarity: Int? { rarity }
+    var cardObtained: Int { eurekaVariants.filter { $0.obtained == true }.count }
+    var cardTotal: Int { eurekaVariants.count }
+    var cardHasUserData: Bool { eurekaVariants.contains { $0.obtained != nil } }
+}
+
+extension EurekaVariant: CardDisplayable {
+    var cardImageURL: String? { imageURL }
+    var cardTitle: String { category?.capitalized ?? slug }
+    var cardLabel: String { color ?? "" }
+    var cardStyle: String { "" }
+    var cardRarity: Int? { nil }
+    var cardObtained: Int { obtained == true ? 1 : 0 }
+    var cardTotal: Int { 1 }
+    var cardHasUserData: Bool { obtained != nil }
+}
+
 // MARK: - User Progress Tracking
 
 struct ObtainedEureka: Codable, Identifiable {
