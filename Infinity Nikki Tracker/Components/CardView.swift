@@ -153,7 +153,7 @@ struct CardContentView: View {
     @ViewBuilder
     private var rarityText: some View {
         if let rarity {
-            Text("\(rarity) ★")
+            Rarity(rarity: rarity, long: layout == .row && true)
         }
     }
 }

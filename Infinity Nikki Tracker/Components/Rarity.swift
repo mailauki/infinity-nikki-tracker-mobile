@@ -9,17 +9,20 @@ import SwiftUI
 
 struct Rarity: View {
     var rarity: Int
+    var long: Bool = false
     
     var body: some View {
-        HStack(spacing: 5) {
-            ForEach(1...rarity, id: \.self) { number in
-                Image(systemName: "sparkle")
-                    .resizable()
-                    .frame(width: 15, height: 15)
-                    .rotationEffect(.degrees(15))
-                    
+        if long {
+            HStack(spacing: 4) {
+                ForEach(1...rarity, id: \.self) { number in
+                    Text("✦").rotationEffect(.degrees(15))
+                }
             }
-            .foregroundStyle(Color.themeSecondary)
+        } else {
+            HStack(spacing: 4) {
+                Text("\(rarity)")
+                Text("✦").rotationEffect(.degrees(15))
+            }
         }
     }
     
@@ -28,4 +31,5 @@ struct Rarity: View {
 
 #Preview {
     Rarity(rarity: 5)
+    Rarity(rarity: 5, long: true)
 }

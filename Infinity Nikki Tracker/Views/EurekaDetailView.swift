@@ -11,7 +11,7 @@ struct EurekaDetail: View {
     let eurekaSet: EurekaSet
     let progress: Float = 0
 
-    @AppStorage("eurekaDetailIsGrid") private var isGrid = false
+    @AppStorage("eurekaIsGrid") private var isGrid = true
 
     private let columns = [
         GridItem(.flexible()),
@@ -96,7 +96,8 @@ struct EurekaDetail: View {
                 
             HStack {
                 if let rarity = eurekaSet.rarity {
-                    Rarity(rarity: rarity)
+                    Rarity(rarity: rarity, long: true)
+                    .foregroundColor(Color.themeSecondary)
                 }
                 
                 Spacer()
@@ -106,8 +107,7 @@ struct EurekaDetail: View {
             
             HStack {
                 if let style = eurekaSet.style {
-                    Text(style.capitalized)
-                        .foregroundStyle(Color.themeOnSurfaceVariant)
+                    Text(style.capitalized).foregroundColor(Color.themePrimary)
                 }
                 
                 Spacer()

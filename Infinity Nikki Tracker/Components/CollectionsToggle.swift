@@ -12,15 +12,6 @@ struct CollectionsToggle: View {
     @Binding var selectedOption: CollectionItem
 
     var body: some View {
-//        ControlGroup {
-//            ForEach(collections) { item in
-//                Toggle(item.label, systemImage: item.icon, isOn: Binding(
-//                    get: { selectedOption == item },
-//                    set: { isOn in if isOn { selectedOption = item } }
-//                ))
-//            }
-//        }
-        
         Picker("Collections", selection: $selectedOption) {
             ForEach(collections) { item in
                 Image(systemName: item.icon)
@@ -28,14 +19,6 @@ struct CollectionsToggle: View {
         }
         .pickerStyle(.segmented)
         .padding()
-        
-        //                        ForEach(collections) { item in
-        //                            VStack(spacing: 4) {
-        //                                Image(systemName: item.icon)
-        //                                Text(item.label)
-        //                                    .font(.system(.subheadline, weight: .semibold))
-        //                            }
-        //                        }
     }
 }
 

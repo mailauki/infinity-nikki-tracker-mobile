@@ -14,7 +14,8 @@ struct EurekaView: View {
     @State private var colors: [EurekaColor] = []
     @State private var isLoading = false
     @State private var errorMessage: String?
-    @State private var isGridView = false
+    
+    @AppStorage("eurekaIsGrid") private var isGrid = true
     
     // MARK: - Constants
     
@@ -28,7 +29,7 @@ struct EurekaView: View {
     var body: some View {
         NavigationSplitView {
             Group {
-                if isGridView {
+                if isGrid {
                     // Grid Layout View
                     eurekaGridView
                 } else {
@@ -48,15 +49,11 @@ struct EurekaView: View {
             .scrollContentBackground(.hidden)
             .background(Color.themeSurface)
             .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    // 5. Toggle Layout Button
+                ToolbarItem(placement: .topBarTrailing) {
                     Button {
-                        withAnimation(.easeInOut(duration: 0.2)) {
-                            isGridView.toggle()
-                        }
+                        isGrid.toggle()
                     } label: {
-                        Image(systemName: isGridView ? "list.bullet" : "square.grid.2x2")
-                            .font(.title3)
+                        Image(systemName: isGrid ? "list.bullet" : "square.grid.2x2")
                     }
                 }
             }
@@ -94,22 +91,6 @@ struct EurekaView: View {
                         EurekaDetail(eurekaSet: eurekaSet)
                     } label: {
                         EurekaSetCard(eurekaSet: eurekaSet)
-//                        SetCard(
-//                        media: {
-//                            CardParts.imageMedia(url: eurekaSet.imageURL ?? "")
-//                        },
-//                        content: {
-//                            CardParts.textContent(title: eurekaSet.title, subtitle: "elegant • yellow".uppercased(), rarity: eurekaSet.rarity ?? 0)
-//                            HStack {
-//                                Image(systemName: "circle.fill")
-//                                    .font(.caption2)
-//                                Text("8/8 complete")
-//                                    .font(.footnote)
-//                            }
-//                            .foregroundStyle(Color.themeSuccess)
-//                            .padding(.top, 6)
-//                        }
-//                    )
                     }
                 }
             }

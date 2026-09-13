@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct CheckToggle: View {
-//    var label: String
     var isChecked: Bool = false
 
     var body: some View {
@@ -25,6 +24,7 @@ struct CheckToggle: View {
                             Circle()
                                 .strokeBorder(Color.themeTertiary, lineWidth: 1)
                     )
+                    .accessibilityLabel(Text("Obtained"))
             } else {
                 Image(systemName: "checkmark")
                     .font(.system(size: 16))
@@ -37,13 +37,7 @@ struct CheckToggle: View {
                             Circle()
                                 .strokeBorder(Color.themeOutlineVariant, lineWidth: 1)
                     )
-//                Image(systemName: "circle")
-//                    .font(.system(size: 16))
-//                    .bold()
-//                    .frame(width: 30, height: 30)
-//                    .foregroundColor(Color.themeOnSuccess)
-//                    .background(Color.themeSuccess.opacity(0.5))
-//                    .clipShape(Circle())
+                    .accessibilityLabel(Text("Not Obtained"))
             }
         }
         .toggleStyle(.button)
@@ -53,8 +47,6 @@ struct CheckToggle: View {
 }
 
 #Preview {
-//    CheckToggle(label: "Obtained", isChecked: true)
-//    CheckToggle(label: "Not Obtained", isChecked: false)
     CheckToggle(isChecked: true)
     CheckToggle(isChecked: false)
 }
