@@ -32,7 +32,7 @@ struct CardView: View {
                 .overlay(alignment: .topTrailing) {
                     if hasUserData {
                         CheckToggle(isChecked: obtained == total && total > 0)
-                            .offset(x: -10, y: 10)
+                            .offset(x: -4, y: 4)
                     }
                 }
             CardContentView(title: item.cardTitle, rarity: item.cardRarity, style: item.cardStyle, label: item.cardLabel, obtained: obtained, total: total, showProgress: hasUserData, layout: layout)

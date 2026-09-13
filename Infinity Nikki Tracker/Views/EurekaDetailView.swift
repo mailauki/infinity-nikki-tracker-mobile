@@ -10,19 +10,21 @@ import SwiftUI
 struct EurekaDetail: View {
     let eurekaSet: EurekaSet
     let progress: Float = 0
-    
-    let columns = [
+
+    @AppStorage("eurekaDetailIsGrid") private var isGrid = false
+
+    private let columns = [
         GridItem(.flexible()),
         GridItem(.flexible()),
         GridItem(.flexible())
     ]
-    
+
     var body: some View {
-        List {
-            Section(header: detailHeader) {
-                ForEach(eurekaSet.eurekaVariants) { eurekaVariant in
-                    EurekaRow(eurekaVariant: eurekaVariant)
-                }.listRowBackground(Color.themeSurfaceContainerLow)
+        Group {
+            if isGrid {
+                gridContent
+            } else {
+                listContent
             }
         }
         .overlay {
@@ -30,10 +32,44 @@ struct EurekaDetail: View {
                 ProgressView()
             }
         }
-        .navigationTitle("\(eurekaSet.title)")
-//        .navigationBarTitleDisplayMode(.inline)
+        .navigationTitle(eurekaSet.title)
         .scrollContentBackground(.hidden)
         .background(Color.themeSurface)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    isGrid.toggle()
+                } label: {
+                    Image(systemName: isGrid ? "list.bullet" : "square.grid.2x2")
+                }
+            }
+        }
+    }
+
+    private var listContent: some View {
+        List {
+            Section(header: detailHeader) {
+                ForEach(eurekaSet.eurekaVariants) { eurekaVariant in
+                    EurekaRow(eurekaVariant: eurekaVariant)
+                }.listRowBackground(Color.themeSurfaceContainerLow)
+            }
+        }
+    }
+
+    private var gridContent: some View {
+        ScrollView {
+            detailHeader
+                .padding(.horizontal)
+                .padding(.top, 20)
+
+            LazyVGrid(columns: columns, spacing: 16) {
+                ForEach(eurekaSet.eurekaVariants) { eurekaVariant in
+                    CardView(item: eurekaVariant, layout: .card)
+                }
+            }
+            .padding(.horizontal)
+            .padding(.bottom)
+        }
     }
     
     var detailHeader: some View {
