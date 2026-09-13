@@ -1,11 +1,11 @@
 {
   "images" : [
     {
-      "filename" : "pendants.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
+      "filename" : "pendants.png",
       "idiom" : "universal",
       "scale" : "2x"
     },

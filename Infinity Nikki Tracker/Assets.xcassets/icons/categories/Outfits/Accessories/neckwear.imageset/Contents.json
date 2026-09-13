@@ -1,11 +1,11 @@
 {
   "images" : [
     {
-      "filename" : "neckwear.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
+      "filename" : "neckwear.png",
       "idiom" : "universal",
       "scale" : "2x"
     },

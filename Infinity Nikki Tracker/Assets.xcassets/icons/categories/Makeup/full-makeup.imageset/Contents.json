@@ -1,11 +1,11 @@
 {
   "images" : [
     {
-      "filename" : "full-makeup.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
+      "filename" : "full-makeup.png",
       "idiom" : "universal",
       "scale" : "2x"
     },

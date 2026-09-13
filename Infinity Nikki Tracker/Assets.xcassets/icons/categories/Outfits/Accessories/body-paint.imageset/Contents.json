@@ -1,11 +1,11 @@
 {
   "images" : [
     {
-      "filename" : "body-paint.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
+      "filename" : "body-paint.png",
       "idiom" : "universal",
       "scale" : "2x"
     },

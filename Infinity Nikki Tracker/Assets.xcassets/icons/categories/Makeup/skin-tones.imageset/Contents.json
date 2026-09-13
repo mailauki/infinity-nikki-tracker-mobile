@@ -1,11 +1,11 @@
 {
   "images" : [
     {
-      "filename" : "skin-tones.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
+      "filename" : "skin-tones.png",
       "idiom" : "universal",
       "scale" : "2x"
     },

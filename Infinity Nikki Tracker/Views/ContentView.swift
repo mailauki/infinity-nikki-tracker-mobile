@@ -28,7 +28,10 @@ struct ContentView: View {
     
     private var authenticatedView: some View {
         TabView {
-            Tab("Eureka", systemImage: "sparkle") {
+            Tab("Home", systemImage: "sparkle") {
+            Text("Home View")
+        }
+            Tab("Eureka", image: "eureka") {
                 EurekaView()
             }
             

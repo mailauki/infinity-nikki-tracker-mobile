@@ -45,7 +45,7 @@ struct CardView: View {
                 .frame(width: 100)
                 .overlay(alignment: .topTrailing) {
                     if hasUserData {
-                        CheckToggle(isChecked: obtained == total && total > 0)
+                        CheckToggle(isChecked: obtained == total && total > 0, size: .sm)
                             .offset(x: -2, y: 2)
                     }
                 }
@@ -161,8 +161,10 @@ struct CardContentView: View {
 #Preview {
     ScrollView {
         VStack(spacing: 20) {
-            CardView(item: SeedData.eurekaSetComplete)
-            CardView(item: SeedData.eurekaSetPartial)
+            HStack(spacing: 10) {
+                CardView(item: SeedData.eurekaSetComplete)
+                CardView(item: SeedData.eurekaSetPartial)
+            }
             Divider()
             CardView(item: SeedData.eurekaSetComplete, layout: .row)
             CardView(item: SeedData.eurekaSetPartial, layout: .row)

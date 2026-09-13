@@ -74,7 +74,7 @@ struct EurekaView: View {
                 NavigationLink {
                     EurekaDetail(eurekaSet: eurekaSet)
                 } label: {
-                    EurekaSetRow(eurekaSet: eurekaSet)
+                    CardView(item: eurekaSet, layout: .row)
                 }.listRowBackground(Color.themeSurfaceContainerLow)
             }
         }
@@ -90,7 +90,7 @@ struct EurekaView: View {
                     NavigationLink {
                         EurekaDetail(eurekaSet: eurekaSet)
                     } label: {
-                        EurekaSetCard(eurekaSet: eurekaSet)
+                        CardView(item: eurekaSet)
                     }
                 }
             }

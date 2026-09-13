@@ -8,37 +8,30 @@
 import SwiftUI
 
 struct CheckToggle: View {
+    enum Size {
+        case sm, md
+
+        var iconSize: CGFloat { self == .sm ? 11 : 16 }
+        var frameSize: CGFloat { self == .sm ? 20 : 30 }
+    }
+
     var isChecked: Bool = false
+    var size: Size = .md
 
     var body: some View {
         Toggle(isOn: .constant(isChecked)) {
-            if isChecked {
-                Image(systemName: "checkmark")
-                    .font(.system(size: 16))
-                    .bold()
-                    .frame(width: 30, height: 30)
-                    .foregroundColor(Color.themeOnSuccess)
-                    .background(Color.themeSuccess)
-                    .clipShape(Circle())
-                    .overlay(
-                            Circle()
-                                .strokeBorder(Color.themeTertiary, lineWidth: 1)
-                    )
-                    .accessibilityLabel(Text("Obtained"))
-            } else {
-                Image(systemName: "checkmark")
-                    .font(.system(size: 16))
-                    .bold()
-                    .frame(width: 30, height: 30)
-                    .foregroundColor(Color.themeOutlineVariant)
-                    .background(Color.themeSurface)
-                    .clipShape(Circle())
-                    .overlay(
-                            Circle()
-                                .strokeBorder(Color.themeOutlineVariant, lineWidth: 1)
-                    )
-                    .accessibilityLabel(Text("Not Obtained"))
-            }
+            Image(systemName: "checkmark")
+                .font(.system(size: size.iconSize))
+                .bold()
+                .frame(width: size.frameSize, height: size.frameSize)
+                .foregroundColor(isChecked ? Color.themeOnSuccess : Color.themeOutlineVariant)
+                .background(isChecked ? Color.themeSuccess : Color.themeSurface)
+                .clipShape(Circle())
+                .overlay(
+                    Circle()
+                        .strokeBorder(isChecked ? Color.themeTertiary : Color.themeOutlineVariant, lineWidth: 1)
+                )
+                .accessibilityLabel(Text(isChecked ? "Obtained" : "Not Obtained"))
         }
         .toggleStyle(.button)
         .buttonStyle(.plain)
@@ -49,4 +42,5 @@ struct CheckToggle: View {
 #Preview {
     CheckToggle(isChecked: true)
     CheckToggle(isChecked: false)
+    CheckToggle(isChecked: true, size: .sm)
 }

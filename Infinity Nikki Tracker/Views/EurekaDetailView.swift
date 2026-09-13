@@ -50,7 +50,7 @@ struct EurekaDetail: View {
         List {
             Section(header: detailHeader) {
                 ForEach(eurekaSet.eurekaVariants) { eurekaVariant in
-                    EurekaRow(eurekaVariant: eurekaVariant)
+                    CardView(item: eurekaVariant, layout: .row)
                 }.listRowBackground(Color.themeSurfaceContainerLow)
             }
         }

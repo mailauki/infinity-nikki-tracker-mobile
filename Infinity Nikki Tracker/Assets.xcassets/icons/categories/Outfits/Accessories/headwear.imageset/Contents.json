@@ -1,11 +1,11 @@
 {
   "images" : [
     {
-      "filename" : "headwear.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
+      "filename" : "headwear.png",
       "idiom" : "universal",
       "scale" : "2x"
     },

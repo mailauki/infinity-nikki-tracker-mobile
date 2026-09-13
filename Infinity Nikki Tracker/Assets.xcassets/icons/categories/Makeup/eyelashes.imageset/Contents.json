@@ -1,11 +1,11 @@
 {
   "images" : [
     {
-      "filename" : "eyelashes.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
+      "filename" : "eyelashes.png",
       "idiom" : "universal",
       "scale" : "2x"
     },

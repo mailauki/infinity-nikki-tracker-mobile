@@ -44,10 +44,10 @@ struct WelcomeView: View {
                 Text("Get Started")
                     .font(.title2)
                     .fontWeight(.bold)
-                    .foregroundStyle(Color.themeOnSecondary)
+                    .foregroundStyle(Color.themeOnPrimary)
                     .padding()
                     .padding(.horizontal, 40)
-                    .background(Color.themeSecondary)
+                    .background(Color.themePrimary)
                     .cornerRadius(.infinity)
             }
         }
