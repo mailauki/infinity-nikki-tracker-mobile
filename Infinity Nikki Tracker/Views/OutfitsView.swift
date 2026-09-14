@@ -189,16 +189,34 @@ struct OutfitsView: View {
         }
     }
 
+    private struct ObtainedVariantSlug: Codable {
+        let outfitVariant: String
+        enum CodingKeys: String, CodingKey {
+            case outfitVariant = "outfit_variant"
+        }
+    }
+
     private func applyObtained(to sets: [OutfitSet], userId: UUID) async -> [OutfitSet] {
         do {
-            let obtainedRecords: [ObtainedOutfits] = try await supabase
-                .from("obtained_outfit")
-                .select("id, outfit_variant")
-                .eq("user_id", value: userId)
-                .execute()
-                .value
+            // Page through every row — a large collection exceeds PostgREST's 1000-row cap.
+            var allRecords: [ObtainedVariantSlug] = []
+            let pageSize = 1000
+            var from = 0
+            while true {
+                let page: [ObtainedVariantSlug] = try await supabase
+                    .from("obtained_outfit")
+                    .select("outfit_variant")
+                    .eq("user_id", value: userId)
+                    .order("id", ascending: true)
+                    .range(from: from, to: from + pageSize - 1)
+                    .execute()
+                    .value
+                allRecords.append(contentsOf: page)
+                if page.count < pageSize { break }
+                from += pageSize
+            }
 
-            let obtainedSlugs = Set(obtainedRecords.map { $0.outfitVariant })
+            let obtainedSlugs = Set(allRecords.map { $0.outfitVariant })
 
             return sets.map { set in
                 set.withVariants(set.outfitVariants.map { variant in
