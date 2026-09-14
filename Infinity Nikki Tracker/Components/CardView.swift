@@ -28,7 +28,7 @@ struct CardView: View {
 
     private var cardLayout: some View {
         VStack(alignment: .leading, spacing: 0) {
-            CardMediaView(url: item.cardImageURL ?? "", square: true)
+            CardMediaView(url: item.cardImageURL ?? "", square: item.cardIsSquare)
                 .overlay(alignment: .topTrailing) {
                     if hasUserData {
                         CheckToggle(isChecked: obtained == total && total > 0)
@@ -41,7 +41,7 @@ struct CardView: View {
 
     private var rowLayout: some View {
         HStack(alignment: .top, spacing: 10) {
-            CardMediaView(url: item.cardImageURL ?? "", square: true)
+            CardMediaView(url: item.cardImageURL ?? "", square: item.cardIsSquare)
                 .frame(width: 100)
                 .overlay(alignment: .topTrailing) {
                     if hasUserData {
@@ -73,8 +73,13 @@ struct CardMediaView: View {
                     Color(Color.themeSurfaceContainerLowest)
                     image
                         .resizable()
-                        .scaledToFit()
-                        .frame(maxWidth: .infinity)
+                        .aspectRatio(contentMode: .fill)
+                        .frame(
+                            minWidth: 0,
+                            maxWidth: .infinity,
+                            minHeight: 0,
+                            maxHeight: .infinity
+                        )
                         .clipped()
                 }
             case .failure:
@@ -88,7 +93,7 @@ struct CardMediaView: View {
                 EmptyView()
             }
         }
-        .aspectRatio(square ? 1/1 : 3/4, contentMode: .fit)
+        .aspectRatio(square ? 1/1 : 2/3, contentMode: .fit)
         .frame(maxWidth: .infinity)
         .clipShape(Rectangle())
         .border(Color.themeOutlineVariant, width: 1)
@@ -144,9 +149,9 @@ struct CardContentView: View {
     @ViewBuilder
     private var subtitleText: some View {
         HStack(spacing: 2) {
-            if !label.isEmpty { Text(label.uppercased()) }
+            if !label.isEmpty { Text(label.uppercased()).lineLimit(1) }
             if !label.isEmpty && !style.isEmpty { Text("•") }
-            if !style.isEmpty { Text(style.uppercased()) }
+            if !style.isEmpty { Text(style.uppercased()).lineLimit(1) }
         }
     }
 
@@ -161,6 +166,7 @@ struct CardContentView: View {
 #Preview {
     ScrollView {
         VStack(spacing: 20) {
+            Divider()
             HStack(spacing: 10) {
                 CardView(item: SeedData.eurekaSetComplete)
                 CardView(item: SeedData.eurekaSetPartial)

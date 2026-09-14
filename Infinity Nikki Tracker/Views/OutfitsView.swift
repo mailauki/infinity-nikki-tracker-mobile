@@ -1,27 +1,26 @@
 //
-//  EurekaView.swift
+//  OutfitsView.swift
 //  Infinity Nikki Tracker
 //
-//  Created by Julie Evans on 2/19/26.
+//  Created by Julie Evans on 9/13/26.
 //
 
 import SwiftUI
 import Supabase
 
-struct EurekaView: View {
-    @State private var eurekaSets: [EurekaSet] = []
-    @State private var categories: [EurekaCategory] = []
-    @State private var colors: [EurekaColor] = []
+struct OutfitsView: View {
+    @State private var outfitSets: [OutfitSet] = []
+    @State private var categories: [OutfitCategory] = []
     @State private var isLoading = false
     @State private var errorMessage: String?
     
-    @AppStorage("eurekaIsGrid") private var isGrid = true
+    @AppStorage("outfitIsGrid") private var isGrid = true
     
     // MARK: - Constants
     
     let columns = [
-        GridItem(.flexible()),
-        GridItem(.flexible())
+        GridItem(.flexible(), spacing: 10),
+        GridItem(.flexible(), spacing: 10)
     ]
     
     // MARK: - Body
@@ -31,21 +30,21 @@ struct EurekaView: View {
             Group {
                 if isGrid {
                     // Grid Layout View
-                    eurekaGridView
+                    outfitGridView
                 } else {
                     // List Layout View
-                    eurekaListView
+                    outfitListView
                 }
             }
             .overlay {
-                if isLoading && eurekaSets.isEmpty {
+                if isLoading && outfitSets.isEmpty {
                     ProgressView()
                 }
             }
             .task {
-                await fetchEureka()
+                await fetchOutfits()
             }
-            .navigationTitle("Eureka")
+            .navigationTitle("Outfits")
             .scrollContentBackground(.hidden)
             .background(Color.themeSurface)
             .toolbar {
@@ -61,93 +60,119 @@ struct EurekaView: View {
             .navigationSplitViewColumnWidth(min: 180, ideal: 200)
 #endif
         } detail: {
-            Text("Select a Eureka")
-                .navigationTitle("Eureka")
+            Text("Select a Outfit")
+                .navigationTitle("Outfits")
         }
     }
     
     // MARK: - View Components
     
-    private var eurekaListView: some View {
+    private var outfitListView: some View {
         List {
-            ForEach(eurekaSets) { eurekaSet in
+            ForEach(outfitSets) { outfitSet in
                 NavigationLink {
-                    EurekaDetail(eurekaSet: eurekaSet)
+                    OutfitDetail(outfitSet: outfitSet)
                 } label: {
-                    CardView(item: eurekaSet, layout: .row)
+                    CardView(item: outfitSet, layout: .row)
                 }.listRowBackground(Color.themeSurfaceContainerLow)
             }
         }
         .refreshable {
-            await fetchEureka()
+            await fetchOutfits()
         }
     }
     
-    private var eurekaGridView: some View {
+    private var outfitGridView: some View {
         ScrollView {
             LazyVGrid(columns: columns, spacing: 20) {
-                ForEach(eurekaSets) { eurekaSet in
+                ForEach(outfitSets) { outfitSet in
                     NavigationLink {
-                        EurekaDetail(eurekaSet: eurekaSet)
+                        OutfitDetail(outfitSet: outfitSet)
                     } label: {
-                        CardView(item: eurekaSet)
+                        CardView(item: outfitSet)
                     }
                 }
             }
             .padding()
         }
         .refreshable {
-            await fetchEureka()
+            await fetchOutfits()
         }
     }
     
     // MARK: - Data Methods
     
-    func fetchEureka() async {
+    func fetchOutfits() async {
         isLoading = true
         errorMessage = nil
         defer { isLoading = false }
 
         do {
-            var sets: [EurekaSet] = try await supabase.from("eureka_sets")
+            var sets: [OutfitSet] = try await supabase.from("outfit_sets")
                 .select(
                     """
                     id,
                     slug,
                     title,
+                    subtitle,
                     description,
                     rarity,
                     style,
                     label,
+                    label_2,
+                    ability,
+                    seasons,
+                    season_category,
+                    "order",
+                    base_set,
+                    handheld_base_only,
+                    season:seasons!outfit_sets_seasons_fkey ( title ),
+                    seasonCategory:season_categories!outfit_sets_season_category_fkey ( title ),
+                    image_url,
+                    alt_image_url,
                     updated_at,
-                    eureka_set_trials ( trial ),
-                    eureka_variants (
-                        id,
-                        slug,
-                        eureka_set,
-                        color,
-                        category,
-                        image_url,
-                        default
+                    outfit_set_carousel_images (
+                      id,
+                      image_url,
+                      sort_order
+                    ),
+                    outfit_variants (
+                      id,
+                      slug,
+                      alt_slug,
+                      outfit_set,
+                      outfit_category,
+                      title,
+                      description,
+                      rarity,
+                      style,
+                      label,
+                      label_2,
+                      image_url,
+                      alt_image_url,
+                      "default",
+                      season_category,
+                      seasons,
+                      updated_at
                     )
                     """
                 )
+                .is("base_set", value: nil)
                 .order("id", ascending: true)
-                .order("id", ascending: true, referencedTable: "eureka_variants")
                 .execute()
                 .value
 
-            print("✅ Successfully loaded \(sets.count) eureka sets")
+            print("✅ Successfully loaded \(sets.count) outfit sets")
 
             if let user = try? await supabase.auth.session.user {
                 sets = await applyObtained(to: sets, userId: user.id)
             }
 
-            eurekaSets = sets
+            outfitSets = sets
 
             // Optionally fetch categories and colors if needed for filtering
             do {
-                categories = try await supabase.from("eureka_categories")
+                categories = try await supabase.from("outfit_categories")
                     .select("slug, title, image_url")
                     .execute()
                     .value
@@ -157,17 +182,6 @@ struct EurekaView: View {
                 print("⚠️ Failed to load categories (non-critical): \(error)")
             }
 
-            do {
-                colors = try await supabase.from("eureka_colors")
-                    .select("slug, title, image_url")
-                    .execute()
-                    .value
-
-                print("✅ Successfully loaded \(colors.count) colors")
-            } catch {
-                print("⚠️ Failed to load colors (non-critical): \(error)")
-            }
-
         } catch {
             print("❌ Eureka fetch error:")
             dump(error)
@@ -175,23 +189,22 @@ struct EurekaView: View {
         }
     }
 
-    private func applyObtained(to sets: [EurekaSet], userId: UUID) async -> [EurekaSet] {
+    private func applyObtained(to sets: [OutfitSet], userId: UUID) async -> [OutfitSet] {
         do {
-            let obtainedRecords: [ObtainedEureka] = try await supabase
-                .from("obtained_eureka")
-                .select("id, eureka_set, category, color")
+            let obtainedRecords: [ObtainedOutfits] = try await supabase
+                .from("obtained_outfit")
+                .select("id, outfit_set, outfit_category, outfit_variant, user_id")
                 .eq("user_id", value: userId)
                 .execute()
                 .value
 
-            let obtainedKeys = Set(obtainedRecords.compactMap { record -> String? in
-                guard let es = record.eurekaSet, let cat = record.category, let col = record.color else { return nil }
-                return "\(es)|\(cat)|\(col)"
+            let obtainedKeys = Set(obtainedRecords.map { record in
+                "\(record.outfitSet)|\(record.outfitCategory)|\(record.outfitVariant)"
             })
 
             return sets.map { set in
-                set.withVariants(set.eurekaVariants.map { variant in
-                    let key = "\(variant.eurekaSet ?? "")|\(variant.category ?? "")|\(variant.color ?? "")"
+                set.withVariants(set.outfitVariants.map { variant in
+                    let key = "\(variant.outfitSet ?? "")|\(variant.outfitCategory ?? "")|\(variant.slug)"
                     return variant.withObtained(obtainedKeys.contains(key))
                 })
             }
@@ -201,7 +214,6 @@ struct EurekaView: View {
         }
     }
 }
-
 #Preview {
-    EurekaView()
+    OutfitsView()
 }

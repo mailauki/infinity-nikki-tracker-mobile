@@ -10,13 +10,13 @@ import SwiftUI
 struct CompletionProgress: View {
     let obtained: Int
     let total: Int
-//    let isComplete: Bool = obtained == total
+    
     var body: some View {
         HStack {
             Image(systemName: obtained == total ? "circle.fill" : "circle")
                 .resizable()
                 .frame(width: 8, height: 8)
-            Text("\(obtained)/\(total) complete")
+            Text("\(obtained)/\(total) \(obtained == total ? "complete" : "pieces")")
                 .font(.caption)
         }
         .foregroundStyle(obtained == total ? Color.themeSuccess : Color.secondary)

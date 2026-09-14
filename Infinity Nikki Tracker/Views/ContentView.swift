@@ -31,6 +31,9 @@ struct ContentView: View {
             Tab("Home", systemImage: "sparkle") {
             Text("Home View")
         }
+            Tab("Outfits", image: "outfits") {
+                OutfitsView()
+            }
             Tab("Eureka", image: "eureka") {
                 EurekaView()
             }
