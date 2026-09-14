@@ -193,19 +193,16 @@ struct OutfitsView: View {
         do {
             let obtainedRecords: [ObtainedOutfits] = try await supabase
                 .from("obtained_outfit")
-                .select("id, outfit_set, outfit_category, outfit_variant, user_id")
+                .select("id, outfit_variant")
                 .eq("user_id", value: userId)
                 .execute()
                 .value
 
-            let obtainedKeys = Set(obtainedRecords.map { record in
-                "\(record.outfitSet)|\(record.outfitCategory)|\(record.outfitVariant)"
-            })
+            let obtainedSlugs = Set(obtainedRecords.map { $0.outfitVariant })
 
             return sets.map { set in
                 set.withVariants(set.outfitVariants.map { variant in
-                    let key = "\(variant.outfitSet ?? "")|\(variant.outfitCategory ?? "")|\(variant.slug)"
-                    return variant.withObtained(obtainedKeys.contains(key))
+                    variant.withObtained(obtainedSlugs.contains(variant.slug))
                 })
             }
         } catch {
