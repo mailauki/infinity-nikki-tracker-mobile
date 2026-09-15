@@ -60,7 +60,6 @@ struct LoginView: View {
             }
         }
         .navigationTitle("Login")
-        .navigationBarBackButtonHidden(true)
         .scrollContentBackground(.hidden)
         .background(Color.themeSurface)
     }

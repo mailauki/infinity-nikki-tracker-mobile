@@ -41,7 +41,6 @@ struct ForgotPasswordView: View {
         }
         .navigationTitle("Reset Your Password")
 //        .navigationBarTitleDisplayMode(.large)
-        .navigationBarBackButtonHidden(true)
         .scrollContentBackground(.hidden)
         .background(Color.themeSurface)
     }

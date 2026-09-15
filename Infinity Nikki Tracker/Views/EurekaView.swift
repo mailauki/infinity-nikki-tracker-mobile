@@ -24,6 +24,7 @@ struct EurekaView: View {
         GridItem(.flexible())
     ]
     
+    
     // MARK: - Body
 
     var body: some View {
@@ -69,14 +70,18 @@ struct EurekaView: View {
     // MARK: - View Components
     
     private var eurekaListView: some View {
-        List {
-            ForEach(eurekaSets) { eurekaSet in
-                NavigationLink {
-                    EurekaDetail(eurekaSet: eurekaSet)
-                } label: {
-                    CardView(item: eurekaSet, layout: .row)
-                }.listRowBackground(Color.themeSurfaceContainerLow)
+        ScrollView {
+            AuthBanner(collectionLabel: "Eureka")
+            LazyVStack(spacing: 10) {
+                ForEach(eurekaSets) { eurekaSet in
+                    NavigationLink {
+                        EurekaDetail(eurekaSet: eurekaSet)
+                    } label: {
+                        CardView(item: eurekaSet, layout: .row)
+                    }.listRowBackground(Color.themeSurfaceContainerLow)
+                }
             }
+            .padding()
         }
         .refreshable {
             await fetchEureka()
@@ -85,6 +90,7 @@ struct EurekaView: View {
     
     private var eurekaGridView: some View {
         ScrollView {
+            AuthBanner(collectionLabel: "Eureka")
             LazyVGrid(columns: columns, spacing: 20) {
                 ForEach(eurekaSets) { eurekaSet in
                     NavigationLink {

@@ -68,14 +68,18 @@ struct OutfitsView: View {
     // MARK: - View Components
     
     private var outfitListView: some View {
-        List {
-            ForEach(outfitSets) { outfitSet in
-                NavigationLink {
-                    OutfitDetail(outfitSet: outfitSet)
-                } label: {
-                    CardView(item: outfitSet, layout: .row)
-                }.listRowBackground(Color.themeSurfaceContainerLow)
+        ScrollView {
+            AuthBanner(collectionLabel: "Outfits")
+            LazyVStack(spacing: 10) {
+                ForEach(outfitSets) { outfitSet in
+                    NavigationLink {
+                        OutfitDetail(outfitSet: outfitSet)
+                    } label: {
+                        CardView(item: outfitSet, layout: .row)
+                    }.listRowBackground(Color.themeSurfaceContainerLow)
+                }
             }
+            .padding()
         }
         .refreshable {
             await fetchOutfits()
@@ -84,6 +88,7 @@ struct OutfitsView: View {
     
     private var outfitGridView: some View {
         ScrollView {
+            AuthBanner(collectionLabel: "Outfits")
             LazyVGrid(columns: columns, spacing: 20) {
                 ForEach(outfitSets) { outfitSet in
                     NavigationLink {

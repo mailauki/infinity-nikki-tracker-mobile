@@ -56,8 +56,17 @@ struct SignupView: View {
             }
         }
         .navigationTitle("Signup")
-//        .navigationBarTitleDisplayMode(.large)
-        .navigationBarBackButtonHidden(true)
+//        .toolbar {
+//            ToolbarItem(placement: .topBarLeading) {
+//                NavigationLink {
+//                    HomeView()
+//                } label: {
+//                    Image(systemName: "chevron.backward")
+//                        .accessibilityLabel("Back")
+//                }
+//            }
+//        }
+//        .navigationBarBackButtonHidden(true)
         .scrollContentBackground(.hidden)
         .background(Color.themeSurface)
     }
