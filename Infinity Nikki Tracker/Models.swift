@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import Supabase
 
 // MARK: - Profile
 
@@ -194,10 +195,28 @@ protocol CardDisplayable {
     var cardTotal: Int { get }
     var cardHasUserData: Bool { get }
     var cardIsSquare: Bool { get }
+    var cardOrder: Int? { get }
 }
 
 extension CardDisplayable {
     var cardIsSquare: Bool { false }
+    var cardOrder: Int? { nil }
+}
+
+// MARK: - DetailDisplayable Protocol
+
+protocol DetailDisplayable: CardDisplayable {
+    var detailDescription: String? { get }
+    var detailAbility: String? { get }
+    var detailSeasons: String? { get }
+    var detailSeasonCategory: String? { get }
+}
+
+extension DetailDisplayable {
+    var detailDescription: String? { nil }
+    var detailAbility: String? { nil }
+    var detailSeasons: String? { nil }
+    var detailSeasonCategory: String? { nil }
 }
 
 extension EurekaSet: CardDisplayable {
@@ -211,6 +230,8 @@ extension EurekaSet: CardDisplayable {
     var cardHasUserData: Bool { eurekaVariants.contains { $0.obtained != nil } }
     var cardIsSquare: Bool { true }
 }
+
+extension EurekaSet: DetailDisplayable {}
 
 extension EurekaVariant: CardDisplayable {
     var cardImageURL: String? { imageURL }
@@ -368,6 +389,7 @@ struct OutfitVariant: Codable, Identifiable {
 
 struct OutfitCategory: Codable, Hashable, Identifiable {
     var id: String { slug }
+    let categoryId: Int
     let slug: String
     let title: String
     let part: String?
@@ -376,6 +398,7 @@ struct OutfitCategory: Codable, Hashable, Identifiable {
 
     enum CodingKeys: String, CodingKey {
         case slug, title, part
+        case categoryId = "id"
         case imageURL = "image_url"
         case createdAt = "created_at"
     }
@@ -406,6 +429,106 @@ extension OutfitSet: CardDisplayable {
     var cardObtained: Int { outfitVariants.filter { $0.obtained == true }.count }
     var cardTotal: Int { outfitVariants.count }
     var cardHasUserData: Bool { outfitVariants.contains { $0.obtained != nil } }
+    var cardOrder: Int? { order }
+}
+
+extension OutfitSet {
+    // Shared PostgREST select used wherever outfit_sets are fetched with their variants.
+    static let supabaseSelect = """
+    id,
+    slug,
+    title,
+    subtitle,
+    description,
+    rarity,
+    style,
+    label,
+    label_2,
+    ability,
+    seasons,
+    season_category,
+    "order",
+    base_set,
+    handheld_base_only,
+    season:seasons!outfit_sets_seasons_fkey ( title ),
+    seasonCategory:season_categories!outfit_sets_season_category_fkey ( title ),
+    image_url,
+    alt_image_url,
+    updated_at,
+    outfit_set_carousel_images (
+      id,
+      image_url,
+      sort_order
+    ),
+    outfit_variants (
+      id,
+      slug,
+      alt_slug,
+      outfit_set,
+      outfit_category,
+      title,
+      description,
+      rarity,
+      style,
+      label,
+      label_2,
+      image_url,
+      alt_image_url,
+      "default",
+      season_category,
+      seasons,
+      updated_at
+    )
+    """
+}
+
+extension Array where Element == OutfitSet {
+    private struct ObtainedVariantSlug: Codable {
+        let outfitVariant: String
+        enum CodingKeys: String, CodingKey {
+            case outfitVariant = "outfit_variant"
+        }
+    }
+
+    // Pages through obtained_outfit rows for a user and marks matching variants as obtained.
+    func applyingObtainedOutfits(userId: UUID) async -> [OutfitSet] {
+        do {
+            var allRecords: [ObtainedVariantSlug] = []
+            let pageSize = 1000
+            var from = 0
+            while true {
+                let page: [ObtainedVariantSlug] = try await supabase
+                    .from("obtained_outfit")
+                    .select("outfit_variant")
+                    .eq("user_id", value: userId)
+                    .order("id", ascending: true)
+                    .range(from: from, to: from + pageSize - 1)
+                    .execute()
+                    .value
+                allRecords.append(contentsOf: page)
+                if page.count < pageSize { break }
+                from += pageSize
+            }
+
+            let obtainedSlugs = Set(allRecords.map { $0.outfitVariant })
+
+            return map { set in
+                set.withVariants(set.outfitVariants.map { variant in
+                    variant.withObtained(obtainedSlugs.contains(variant.slug))
+                })
+            }
+        } catch {
+            print("⚠️ Failed to load obtained data: \(error)")
+            return self
+        }
+    }
+}
+
+extension OutfitSet: DetailDisplayable {
+    var detailDescription: String? { description }
+    var detailAbility: String? { ability }
+    var detailSeasons: String? { seasons }
+    var detailSeasonCategory: String? { seasonCategory }
 }
 
 extension OutfitVariant: CardDisplayable {

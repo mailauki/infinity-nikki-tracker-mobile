@@ -66,8 +66,6 @@ struct LoginView: View {
     
     // MARK: - View Components
     
-    // MARK: - View Components
-    
     private var header: some View {
         Text("Enter your email below to login to your account")
             .font(.subheadline)

@@ -18,6 +18,9 @@ struct CardView: View {
     private var obtained: Int { item.cardObtained }
     private var total: Int { item.cardTotal }
     private var hasUserData: Bool { item.cardHasUserData }
+    // Order 0 is a glowup, 1 is the base set, and anything higher is a regular evolution.
+    private var isGlowup: Bool { item.cardOrder == 0 }
+    private var isEvolution: Bool { (item.cardOrder ?? 1) != 1 }
 
     var body: some View {
         switch layout {
@@ -35,6 +38,14 @@ struct CardView: View {
                             .offset(x: -4, y: 4)
                     }
                 }
+                .overlay(alignment: .topLeading) {
+                    if isEvolution {
+                        Image(isGlowup ? "glowup" : "evolution")
+                            .resizable()
+                            .frame(width: 34, height: 34)
+                            .offset(x: 4, y: 4)
+                    }
+                }
             CardContentView(title: item.cardTitle, rarity: item.cardRarity, style: item.cardStyle, label: item.cardLabel, obtained: obtained, total: total, showProgress: hasUserData, layout: layout)
         }
     }
@@ -47,6 +58,14 @@ struct CardView: View {
                     if hasUserData {
                         CheckToggle(isChecked: obtained == total && total > 0, size: .sm)
                             .offset(x: -2, y: 2)
+                    }
+                }
+                .overlay(alignment: .topLeading) {
+                    if isEvolution {
+                        Image(isGlowup ? "glowup" : "evolution")
+                            .resizable()
+                            .frame(width: 24, height: 24)
+                            .offset(x: 2, y: 2)
                     }
                 }
             CardContentView(title: item.cardTitle, rarity: item.cardRarity, style: item.cardStyle, label: item.cardLabel, obtained: obtained, total: total, showProgress: hasUserData, layout: layout)

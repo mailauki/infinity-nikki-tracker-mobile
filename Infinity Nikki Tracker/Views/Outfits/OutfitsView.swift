@@ -114,63 +114,33 @@ struct OutfitsView: View {
 
         do {
             var sets: [OutfitSet] = try await supabase.from("outfit_sets")
-                .select(
-                    """
-                    id,
-                    slug,
-                    title,
-                    subtitle,
-                    description,
-                    rarity,
-                    style,
-                    label,
-                    label_2,
-                    ability,
-                    seasons,
-                    season_category,
-                    "order",
-                    base_set,
-                    handheld_base_only,
-                    season:seasons!outfit_sets_seasons_fkey ( title ),
-                    seasonCategory:season_categories!outfit_sets_season_category_fkey ( title ),
-                    image_url,
-                    alt_image_url,
-                    updated_at,
-                    outfit_set_carousel_images (
-                      id,
-                      image_url,
-                      sort_order
-                    ),
-                    outfit_variants (
-                      id,
-                      slug,
-                      alt_slug,
-                      outfit_set,
-                      outfit_category,
-                      title,
-                      description,
-                      rarity,
-                      style,
-                      label,
-                      label_2,
-                      image_url,
-                      alt_image_url,
-                      "default",
-                      season_category,
-                      seasons,
-                      updated_at
-                    )
-                    """
-                )
-                .is("base_set", value: nil)
+                .select(OutfitSet.supabaseSelect)
                 .order("id", ascending: true)
                 .execute()
                 .value
 
+            // Group each evolution with its base set (by the base set's id), then
+            // order within that group: base set first, evolutions in between, glowup last.
+            let idBySlug = Dictionary(uniqueKeysWithValues: sets.map { ($0.slug, $0.id) })
+            func evolutionPriority(_ order: Int) -> Int {
+                if order == 1 { return 0 }
+                if order == 0 { return 2 }
+                return 1
+            }
+            sets.sort { lhs, rhs in
+                let lhsGroup = lhs.baseSet.flatMap { idBySlug[$0] } ?? lhs.id
+                let rhsGroup = rhs.baseSet.flatMap { idBySlug[$0] } ?? rhs.id
+                if lhsGroup != rhsGroup { return lhsGroup < rhsGroup }
+
+                let lhsPriority = evolutionPriority(lhs.order)
+                let rhsPriority = evolutionPriority(rhs.order)
+                return lhsPriority != rhsPriority ? lhsPriority < rhsPriority : lhs.order < rhs.order
+            }
+
             print("✅ Successfully loaded \(sets.count) outfit sets")
 
             if let user = try? await supabase.auth.session.user {
-                sets = await applyObtained(to: sets, userId: user.id)
+                sets = await sets.applyingObtainedOutfits(userId: user.id)
             }
 
             outfitSets = sets
@@ -178,7 +148,7 @@ struct OutfitsView: View {
             // Optionally fetch categories and colors if needed for filtering
             do {
                 categories = try await supabase.from("outfit_categories")
-                    .select("slug, title, image_url")
+                    .select("id, slug, title, image_url")
                     .execute()
                     .value
 
@@ -194,45 +164,6 @@ struct OutfitsView: View {
         }
     }
 
-    private struct ObtainedVariantSlug: Codable {
-        let outfitVariant: String
-        enum CodingKeys: String, CodingKey {
-            case outfitVariant = "outfit_variant"
-        }
-    }
-
-    private func applyObtained(to sets: [OutfitSet], userId: UUID) async -> [OutfitSet] {
-        do {
-            // Page through every row — a large collection exceeds PostgREST's 1000-row cap.
-            var allRecords: [ObtainedVariantSlug] = []
-            let pageSize = 1000
-            var from = 0
-            while true {
-                let page: [ObtainedVariantSlug] = try await supabase
-                    .from("obtained_outfit")
-                    .select("outfit_variant")
-                    .eq("user_id", value: userId)
-                    .order("id", ascending: true)
-                    .range(from: from, to: from + pageSize - 1)
-                    .execute()
-                    .value
-                allRecords.append(contentsOf: page)
-                if page.count < pageSize { break }
-                from += pageSize
-            }
-
-            let obtainedSlugs = Set(allRecords.map { $0.outfitVariant })
-
-            return sets.map { set in
-                set.withVariants(set.outfitVariants.map { variant in
-                    variant.withObtained(obtainedSlugs.contains(variant.slug))
-                })
-            }
-        } catch {
-            print("⚠️ Failed to load obtained data: \(error)")
-            return sets
-        }
-    }
 }
 #Preview {
     OutfitsView()
