@@ -14,6 +14,8 @@ struct HomeView: View {
                 Hero()
                 CTAButtons()
             }
+            .scrollContentBackground(.hidden)
+            .background(Color.themeSurface)
         }
     }
 }
@@ -78,7 +80,7 @@ struct CTAButtons: View {
     var body: some View {
         HStack {
             if authManager.isAuthenticated {
-                NavigationLink {
+                NavigationLink { // TODO: Check if link can mirror tabs, or for better option
                     ProfileView()
                 } label: {
                     Text("My Collection")
@@ -86,6 +88,7 @@ struct CTAButtons: View {
                 .buttonStyle(.borderedProminent)
                 .controlSize(.small)
                 .tint(Color.themeInverseSurface)
+                .foregroundColor(Color.themeOnInverseSurface)
             } else {
                 NavigationLink {
                     SignupView()
@@ -95,6 +98,7 @@ struct CTAButtons: View {
                 .buttonStyle(.borderedProminent)
                 .controlSize(.small)
                 .tint(Color.themeInverseSurface)
+                .foregroundColor(Color.themeOnInverseSurface)
             }
             NavigationLink {
                 Text("Seasons")

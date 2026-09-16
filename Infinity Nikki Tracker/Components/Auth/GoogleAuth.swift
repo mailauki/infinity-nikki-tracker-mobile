@@ -13,22 +13,18 @@ struct GoogleAuth: View {
     @State private var loginError: String?
 
     var body: some View {
-        VStack(spacing: 20) {
-            Text("Welcome Back")
-                .font(.largeTitle)
-                .bold()
-            
-            // The official Google Sign-In Button
-            GoogleSignInButton(scheme: .light, style: .standard, state: .normal) {
-                handleGoogleSignIn()
-            }
-            .frame(width: 280, height: 45)
-            
-            if let error = loginError {
-                Text(error)
-                    .foregroundColor(.red)
-                    .font(.caption)
-            }
+        // The official Google Sign-In Button
+        GoogleSignInButton(scheme: .light, style: .standard, state: .normal) {
+            handleGoogleSignIn()
+        }
+        //            .frame(width: 280, height: 45)
+        .clipShape(RoundedRectangle(cornerRadius: 10))
+        .frame(width: 380, height: 44)
+        
+        if let error = loginError {
+            Text(error)
+                .foregroundColor(.red)
+                .font(.caption)
         }
     }
     

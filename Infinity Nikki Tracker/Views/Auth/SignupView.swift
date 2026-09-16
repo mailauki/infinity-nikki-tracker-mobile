@@ -41,6 +41,8 @@ struct SignupView: View {
                         .textContentType(.password)
                         .keyboardType(.default)
                 }
+                .foregroundColor(.themeOnSurface)
+                .listRowBackground(Color.themeSurfaceContainerLowest)
                 
                 Section(footer: LoginViewLink()) {
                     Button("Signup") {

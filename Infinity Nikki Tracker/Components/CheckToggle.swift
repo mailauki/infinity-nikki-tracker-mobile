@@ -15,7 +15,7 @@ struct CheckToggle: View {
         var frameSize: CGFloat { self == .sm ? 20 : 30 }
     }
 
-    var isChecked: Bool = false
+    var isChecked: Bool = false // TODO: Add toggle obtained (set/variant) functionality
     var size: Size = .md
 
     var body: some View {
@@ -29,7 +29,7 @@ struct CheckToggle: View {
                 .clipShape(Circle())
                 .overlay(
                     Circle()
-                        .strokeBorder(isChecked ? Color.themeTertiary : Color.themeOutlineVariant, lineWidth: 1)
+                        .strokeBorder(isChecked ? Color.themeSuccess : Color.themeOutlineVariant, lineWidth: 1)
                 )
                 .accessibilityLabel(Text(isChecked ? "Obtained" : "Not Obtained"))
         }

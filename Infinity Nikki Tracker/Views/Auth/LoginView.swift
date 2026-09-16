@@ -16,8 +16,8 @@ struct LoginView: View {
     @State private var errorMessage: String?
     
     var body: some View {
-        VStack {
-            Form {
+        VStack { // TODO: Add google and discord login and sign up buttons
+            Form { // TODO: Check login/signup flow, such as HomeView redirect
                 Section(header: header,footer: ForgotPasswordViewLink()) {
                     TextField("Email", text: $email)
                         .textInputAutocapitalization(.never)
@@ -33,6 +33,8 @@ struct LoginView: View {
                         .textContentType(.password)
                         .keyboardType(.default)
                 }
+                .foregroundColor(.themeOnSurface)
+                .listRowBackground(Color.themeSurfaceContainerLowest)
                 
                 Section(footer: SignupViewLink()) {
                     Button("Login") {

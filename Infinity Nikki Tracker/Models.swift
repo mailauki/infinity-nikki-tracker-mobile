@@ -35,6 +35,110 @@ struct Profile: Codable {
     }
 }
 
+// MARK: - User Preferences
+
+enum ThemeMode: String, Codable, CaseIterable, Identifiable {
+    case system, light, dark
+
+    var id: String { rawValue }
+
+    var label: String {
+        switch self {
+        case .system: return "System"
+        case .light: return "Light"
+        case .dark: return "Dark"
+        }
+    }
+
+    var systemImage: String {
+        switch self {
+        case .system: return "display"
+        case .light: return "sun.max"
+        case .dark: return "moon"
+        }
+    }
+}
+
+enum TextScale: String, Codable, CaseIterable, Identifiable {
+    case compact, `default`, comfortable, large
+
+    var id: String { rawValue }
+
+    var label: String {
+        switch self {
+        case .compact: return "Compact"
+        case .default: return "Default"
+        case .comfortable: return "Comfortable"
+        case .large: return "Large"
+        }
+    }
+}
+
+enum DefaultSortOrder: String, Codable, CaseIterable, Identifiable {
+    case newest, oldest
+
+    var id: String { rawValue }
+
+    var label: String {
+        switch self {
+        case .newest: return "Newest first"
+        case .oldest: return "Oldest first"
+        }
+    }
+}
+
+enum ColorTheme: String, Codable, CaseIterable, Identifiable {
+    case terracotta, moonlight, cherryBlossom = "cherry_blossom", forest
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .terracotta: return "Terracotta"
+        case .moonlight: return "Moonlight"
+        case .cherryBlossom: return "Cherry Blossom"
+        case .forest: return "Forest"
+        }
+    }
+
+    var subtitle: String {
+        switch self {
+        case .terracotta: return "Warm earthy tones"
+        case .moonlight: return "Cool purples and lavender"
+        case .cherryBlossom: return "Deep rose and soft pinks"
+        case .forest: return "Lush greens and foliage"
+        }
+    }
+
+    /// Matches the theme's subfolder name under Assets.xcassets/Theme.
+    var assetFolder: String {
+        switch self {
+        case .terracotta: return "Terracotta"
+        case .moonlight: return "Moonlight"
+        case .cherryBlossom: return "Cherry Blossom"
+        case .forest: return "Forest"
+        }
+    }
+}
+
+struct UserPreferences: Codable {
+    let userId: String?
+    let theme: ThemeMode?
+    let colorTheme: ColorTheme?
+    let sortOrder: DefaultSortOrder?
+    let textScale: TextScale?
+    let updatedAt: String?
+
+    enum CodingKeys: String, CodingKey {
+        case userId = "user_id"
+        case theme
+        case colorTheme = "color_theme"
+        case sortOrder = "sort_order"
+        case textScale = "text_scale"
+        case updatedAt = "updated_at"
+    }
+}
+
 // MARK: - Eureka Models
 
 struct EurekaSet: Codable, Identifiable {

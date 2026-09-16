@@ -25,6 +25,8 @@ struct ForgotPasswordView: View {
                         .textContentType(.emailAddress)
                         .keyboardType(.emailAddress)
                 }
+                .foregroundColor(.themeOnSurface)
+                .listRowBackground(Color.themeSurfaceContainerLowest)
                 
                 Section(footer: LoginViewLink()) {
                     Button("Send reset email") {

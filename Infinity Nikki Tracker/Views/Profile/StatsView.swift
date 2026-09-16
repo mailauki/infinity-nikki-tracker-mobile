@@ -48,6 +48,7 @@ struct StatsView: View {
         }
         .task { await fetchEureka() }
         .navigationTitle("Stats")
+//        .scrollContentBackground(.hidden)
         .background(Color.themeSurface)
     }
 

@@ -14,7 +14,7 @@ let gradientColors: [Color] = [
 
 struct WelcomeView: View {
     var body: some View {
-        VStack {
+        VStack { // TODO: Make into Launch Screen
             ZStack {
                 RoundedRectangle(cornerRadius: 30)
                     .frame(width: 150, height: 150)

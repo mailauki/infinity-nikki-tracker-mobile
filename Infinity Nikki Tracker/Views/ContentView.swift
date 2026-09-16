@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ContentView: View {
     @State private var authManager = AuthManager()
+    @State private var appearanceManager = AppearanceManager.shared
 
     var body: some View {
         TabView {
@@ -30,8 +31,14 @@ struct ContentView: View {
             }
         }
         .environment(authManager)
+        .environment(appearanceManager)
+        .preferredColorScheme(appearanceManager.colorScheme)
+        .dynamicTypeSize(appearanceManager.dynamicTypeSize)
         .task {
             await authManager.observeAuthStateChanges()
+        }
+        .task {
+            await appearanceManager.load()
         }
     }
 }

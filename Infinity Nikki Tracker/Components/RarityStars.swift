@@ -1,5 +1,5 @@
 //
-//  Rarity.swift
+//  RarityStars.swift
 //  Infinity Nikki Tracker
 //
 //  Created by Julie Evans on 2/25/26.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct Rarity: View {
+struct RarityStars: View {
     var rarity: Int
     var long: Bool = false
     
@@ -30,6 +30,6 @@ struct Rarity: View {
 
 
 #Preview {
-    Rarity(rarity: 5)
-    Rarity(rarity: 5, long: true)
+    RarityStars(rarity: 5)
+    RarityStars(rarity: 5, long: true)
 }

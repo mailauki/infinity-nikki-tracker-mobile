@@ -14,6 +14,7 @@ enum CardLayout {
 struct CardView: View {
     let item: any CardDisplayable
     var layout: CardLayout = .card
+    var checkToggleSize: CheckToggle.Size?
 
     private var obtained: Int { item.cardObtained }
     private var total: Int { item.cardTotal }
@@ -21,6 +22,11 @@ struct CardView: View {
     // Order 0 is a glowup, 1 is the base set, and anything higher is a regular evolution.
     private var isGlowup: Bool { item.cardOrder == 0 }
     private var isEvolution: Bool { (item.cardOrder ?? 1) != 1 }
+    private var isEureka: Bool { (item.cardOrder == nil) }
+    // Rows are always compact; card layout defaults to md unless overridden (e.g. eureka's 3-column grid).
+    private var resolvedCheckToggleSize: CheckToggle.Size {
+        checkToggleSize ?? (layout == .row ? .sm : .md)
+    }
 
     var body: some View {
         switch layout {
@@ -34,7 +40,7 @@ struct CardView: View {
             CardMediaView(url: item.cardImageURL ?? "", square: item.cardIsSquare)
                 .overlay(alignment: .topTrailing) {
                     if hasUserData {
-                        CheckToggle(isChecked: obtained == total && total > 0)
+                        CheckToggle(isChecked: obtained == total && total > 0, size: resolvedCheckToggleSize)
                             .offset(x: -4, y: 4)
                     }
                 }
@@ -56,7 +62,7 @@ struct CardView: View {
                 .frame(width: 100)
                 .overlay(alignment: .topTrailing) {
                     if hasUserData {
-                        CheckToggle(isChecked: obtained == total && total > 0, size: .sm)
+                        CheckToggle(isChecked: obtained == total && total > 0, size: resolvedCheckToggleSize)
                             .offset(x: -2, y: 2)
                     }
                 }
@@ -77,7 +83,7 @@ struct CardView: View {
 struct CardMediaView: View {
     let url: String
     let square: Bool
-    
+
     var body: some View {
         AsyncImage(url: URL(string: url)) { phase in
             switch phase {
@@ -100,6 +106,7 @@ struct CardMediaView: View {
                             maxHeight: .infinity
                         )
                         .clipped()
+//                        .opacity(0.75) // TODO: Apply to dark mode
                 }
             case .failure:
                 ZStack {
@@ -177,7 +184,7 @@ struct CardContentView: View {
     @ViewBuilder
     private var rarityText: some View {
         if let rarity {
-            Rarity(rarity: rarity, long: layout == .row && true)
+            RarityStars(rarity: rarity, long: layout == .row && true)
         }
     }
 }

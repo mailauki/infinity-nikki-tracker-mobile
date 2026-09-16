@@ -113,105 +113,12 @@ struct ProfileView: View {
             .padding(.bottom, 150)
         }
         .navigationTitle("Profile")
+        .scrollContentBackground(.hidden)
+        .background(Color.themeSurface)
         .task {
             await getInitialProfile()
         }
-        
-        
-//        NavigationStack {
-//            Form {
-//                Section {
-//                    HStack {
-//                        Group {
-//                            if let avatarImage {
-//                                avatarImage.image
-//                                    .resizable()
-//                                    .scaledToFit()
-//                            } else {
-//                                Image(systemName: "person.fill")
-//                                    .resizable()
-//                                    .scaledToFit()
-//                                    .padding(.vertical, 20.5)
-//                                    .padding(.horizontal, 21.5)
-//                                    .background(Color.gray)
-//                                    .foregroundStyle(Color.white)
-//                                    
-//                            }
-//                        }
-//                        .frame(width: 80, height: 80)
-//                        .clipShape(Circle())
-//                        
-//                        Spacer()
-//                        
-//                        PhotosPicker(selection: $imageSelection, matching: .images) {
-//                            Label("Select a Photo", systemImage: "pencil")
-//                                .labelStyle(.iconOnly)
-//                                .font(.system(size: 25))
-//                                .frame(width: 40, height: 40)
-//                                .foregroundColor(Color.mdOnPrimary)
-//                                .background(Color.mdPrimary)
-//                                .clipShape(Circle())
-//                        }
-//                    }
-//                }
-//                
-//                Section {
-//                    Text(email)
-//                        .foregroundStyle(.secondary)
-//                } header: {
-//                    Text("Email")
-//                }
-//                
-//                Section {
-//                    TextField("Username", text: $username)
-//                    TextField("Display name", text: $displayName)
-//                } header: {
-//                    Text("Profile Information")
-//                }
-//                Section {
-//                    Button("Update profile") {
-//                        updateProfile()
-//                    }
-//                    .fontWeight(.bold)
-//                    .frame(maxWidth: .infinity, alignment: .center)
-//                    .buttonStyle(.plain)
-//                    
-//                    if isLoading {
-//                        ProgressView()
-//                            .frame(maxWidth: .infinity)
-//                    }
-//                    
-//                    if let errorMessage {
-//                        Text(errorMessage)
-//                            .foregroundStyle(.red)
-//                            .font(.caption)
-//                            .multilineTextAlignment(.center)
-//                    }
-//                }
-//                .foregroundColor(.themeOnPrimary)
-//                .listRowBackground(Color.themePrimary)
-//            }
-//            .navigationTitle("Profile")
-//            .background(Color.themeSurface)
-//            .scrollContentBackground(.hidden)
-//            .toolbar(content: {
-//                ToolbarItem(placement: .confirmationAction) {
-//                    Button("Sign out", role: .destructive) {
-//                        Task {
-//                            try? await supabase.auth.signOut()
-//                        }
-//                    }
-//                }
-//            })
-//            .onChange(of: imageSelection) { _, newValue in
-//                guard let newValue else { return }
-//                loadTransferable(from: newValue)
-//            }
-//        }
-//        .task {
-//            await getInitialProfile()
-//        }
-        
+
     }
     
     // MARK: - Methods
@@ -405,4 +312,5 @@ struct ProfileView: View {
 
 #Preview {
     ProfileView()
+        .environment(AppearanceManager.shared)
 }

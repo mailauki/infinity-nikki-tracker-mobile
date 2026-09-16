@@ -82,7 +82,7 @@ struct ColorTestView: View {
                         CheckToggle( isChecked: true)
                         CheckToggle( isChecked: false)
                         
-                        Rarity(rarity: 5)
+                        RarityStars(rarity: 5)
                     }
                     .padding()
                 }

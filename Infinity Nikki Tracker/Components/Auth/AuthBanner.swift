@@ -45,7 +45,7 @@ struct AuthBanner: View {
         }
         .foregroundColor(Color.themeOnPrimaryContainer)
         .padding()
-        .background(Color.themePrimaryContainer)
+        .background(Color.themePrimaryContainer.opacity(0.6))
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .padding()
     }

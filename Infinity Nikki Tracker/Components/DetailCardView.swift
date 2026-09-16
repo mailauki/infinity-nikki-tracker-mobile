@@ -36,7 +36,7 @@ struct DetailCardView<Item: DetailDisplayable>: View {
 
                 HStack {
                     if let rarity = item.cardRarity {
-                        Rarity(rarity: rarity, long: true)
+                        RarityStars(rarity: rarity, long: true)
                             .foregroundColor(Color.themeSecondary)
                     }
 

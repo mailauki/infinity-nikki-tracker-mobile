@@ -98,7 +98,7 @@ struct EurekaDetail: View {
         ScrollView {
             LazyVGrid(columns: columns, spacing: 16) {
                 ForEach(filteredVariants) { eurekaVariant in
-                    CardView(item: eurekaVariant, layout: .card)
+                    CardView(item: eurekaVariant, layout: .card, checkToggleSize: .sm)
                 }
             }
             .padding(.horizontal)
