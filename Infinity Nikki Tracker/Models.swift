@@ -647,6 +647,250 @@ extension OutfitVariant: CardDisplayable {
     var cardIsSquare: Bool { true }
 }
 
+// MARK: - Makeup Models
+
+struct MakeupSet: Codable, Hashable, Identifiable {
+    let id: Int
+    let slug: String
+    let title: String
+    let description: String?
+    let rarity: Int?
+    let style: String?
+    let outfitSet: String?  // Foreign key to outfit_sets (slug)
+    let baseSet: String?    // Foreign key to makeup_sets (slug)
+    let imageURL: String?
+    let altImageURL: String?
+    let order: Int
+    let seasonCategory: String?  // Foreign key to season_categories
+    let seasons: String?         // Foreign key to seasons
+    let createdAt: String?
+    let updatedAt: String?
+    let makeupVariants: [MakeupVariant]
+
+    init(id: Int, slug: String, title: String, description: String?, rarity: Int?, style: String?, outfitSet: String?, baseSet: String?, imageURL: String?, altImageURL: String?, order: Int, seasonCategory: String?, seasons: String?, createdAt: String?, updatedAt: String?, makeupVariants: [MakeupVariant]) {
+        self.id = id
+        self.slug = slug
+        self.title = title
+        self.description = description
+        self.rarity = rarity
+        self.style = style
+        self.outfitSet = outfitSet
+        self.baseSet = baseSet
+        self.imageURL = imageURL
+        self.altImageURL = altImageURL
+        self.order = order
+        self.seasonCategory = seasonCategory
+        self.seasons = seasons
+        self.createdAt = createdAt
+        self.updatedAt = updatedAt
+        self.makeupVariants = makeupVariants
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decode(Int.self, forKey: .id)
+        slug = try c.decode(String.self, forKey: .slug)
+        title = try c.decode(String.self, forKey: .title)
+        description = try c.decodeIfPresent(String.self, forKey: .description)
+        rarity = try c.decodeIfPresent(Int.self, forKey: .rarity)
+        style = try c.decodeIfPresent(String.self, forKey: .style)
+        outfitSet = try c.decodeIfPresent(String.self, forKey: .outfitSet)
+        baseSet = try c.decodeIfPresent(String.self, forKey: .baseSet)
+        imageURL = try c.decodeIfPresent(String.self, forKey: .imageURL)
+        altImageURL = try c.decodeIfPresent(String.self, forKey: .altImageURL)
+        order = try c.decode(Int.self, forKey: .order)
+        seasonCategory = try c.decodeIfPresent(String.self, forKey: .seasonCategory)
+        seasons = try c.decodeIfPresent(String.self, forKey: .seasons)
+        createdAt = try c.decodeIfPresent(String.self, forKey: .createdAt)
+        updatedAt = try c.decodeIfPresent(String.self, forKey: .updatedAt)
+        makeupVariants = (try? c.decode([MakeupVariant].self, forKey: .makeupVariants)) ?? []
+    }
+
+    func withVariants(_ variants: [MakeupVariant]) -> MakeupSet {
+        MakeupSet(
+            id: id, slug: slug, title: title, description: description,
+            rarity: rarity, style: style, outfitSet: outfitSet, baseSet: baseSet,
+            imageURL: imageURL, altImageURL: altImageURL, order: order,
+            seasonCategory: seasonCategory, seasons: seasons,
+            createdAt: createdAt, updatedAt: updatedAt, makeupVariants: variants
+        )
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case id, slug, title, description, rarity, style, seasons, order
+        case outfitSet = "outfit_set"
+        case baseSet = "base_set"
+        case imageURL = "image_url"
+        case altImageURL = "alt_image_url"
+        case seasonCategory = "season_category"
+        case createdAt = "created_at"
+        case updatedAt = "updated_at"
+        case makeupVariants = "makeup_variants"
+    }
+}
+
+struct MakeupVariant: Codable, Hashable, Identifiable {
+    let id: Int
+    let slug: String
+    let altSlug: String?
+    let makeupSet: String?       // Foreign key to makeup_sets (slug)
+    let makeupCategory: String?  // Foreign key to makeup_categories (slug)
+    let title: String?
+    let description: String?
+    let rarity: Int?
+    let style: String?
+    let imageURL: String?
+    let altImageURL: String?
+    let isDefault: Bool
+    let seasonCategory: String?  // Foreign key to season_categories
+    let seasons: String?         // Foreign key to seasons
+    let createdAt: String?
+    let updatedAt: String?
+    var obtained: Bool?  // User-specific tracking
+
+    func withObtained(_ obtained: Bool) -> MakeupVariant {
+        MakeupVariant(id: id, slug: slug, altSlug: altSlug, makeupSet: makeupSet, makeupCategory: makeupCategory, title: title, description: description, rarity: rarity, style: style, imageURL: imageURL, altImageURL: altImageURL, isDefault: isDefault, seasonCategory: seasonCategory, seasons: seasons, createdAt: createdAt, updatedAt: updatedAt, obtained: obtained)
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case id, slug, title, description, rarity, style, seasons, obtained
+        case altSlug = "alt_slug"
+        case makeupSet = "makeup_set"
+        case makeupCategory = "makeup_category"
+        case imageURL = "image_url"
+        case altImageURL = "alt_image_url"
+        case isDefault = "default"
+        case seasonCategory = "season_category"
+        case createdAt = "created_at"
+        case updatedAt = "updated_at"
+    }
+}
+
+struct MakeupCategory: Codable, Hashable, Identifiable {
+    var id: String { slug }
+    let categoryId: Int
+    let slug: String
+    let title: String
+    let imageURL: String?
+    let createdAt: String?
+
+    enum CodingKeys: String, CodingKey {
+        case slug, title
+        case categoryId = "id"
+        case imageURL = "image_url"
+        case createdAt = "created_at"
+    }
+}
+
+extension MakeupSet: CardDisplayable {
+    var cardImageURL: String? { imageURL }
+    var cardTitle: String { title }
+    var cardLabel: String { "" }
+    var cardStyle: String { style ?? "" }
+    var cardRarity: Int? { rarity }
+    var cardObtained: Int { makeupVariants.filter { $0.obtained == true }.count }
+    var cardTotal: Int { makeupVariants.count }
+    var cardHasUserData: Bool { makeupVariants.contains { $0.obtained != nil } }
+    var cardOrder: Int? { order }
+}
+
+extension MakeupSet: DetailDisplayable {
+    var detailDescription: String? { description }
+    var detailSeasons: String? { seasons }
+    var detailSeasonCategory: String? { seasonCategory }
+}
+
+extension MakeupSet {
+    // Shared PostgREST select used wherever makeup_sets are fetched with their variants.
+    static let supabaseSelect = """
+    id,
+    slug,
+    title,
+    description,
+    rarity,
+    style,
+    outfit_set,
+    base_set,
+    "order",
+    season_category,
+    seasons,
+    image_url,
+    alt_image_url,
+    updated_at,
+    makeup_variants (
+      id,
+      slug,
+      alt_slug,
+      makeup_set,
+      makeup_category,
+      title,
+      description,
+      rarity,
+      style,
+      image_url,
+      alt_image_url,
+      "default",
+      season_category,
+      seasons,
+      updated_at
+    )
+    """
+}
+
+extension Array where Element == MakeupSet {
+    private struct ObtainedMakeupVariantSlug: Codable {
+        let makeupVariant: String
+        enum CodingKeys: String, CodingKey {
+            case makeupVariant = "makeup_variant"
+        }
+    }
+
+    // Pages through obtained_makeup rows for a user and marks matching variants as obtained.
+    func applyingObtainedMakeup(userId: UUID) async -> [MakeupSet] {
+        do {
+            var allRecords: [ObtainedMakeupVariantSlug] = []
+            let pageSize = 1000
+            var from = 0
+            while true {
+                let page: [ObtainedMakeupVariantSlug] = try await supabase
+                    .from("obtained_makeup")
+                    .select("makeup_variant")
+                    .eq("user_id", value: userId)
+                    .order("id", ascending: true)
+                    .range(from: from, to: from + pageSize - 1)
+                    .execute()
+                    .value
+                allRecords.append(contentsOf: page)
+                if page.count < pageSize { break }
+                from += pageSize
+            }
+
+            let obtainedSlugs = Set(allRecords.map { $0.makeupVariant })
+
+            return map { set in
+                set.withVariants(set.makeupVariants.map { variant in
+                    variant.withObtained(obtainedSlugs.contains(variant.slug))
+                })
+            }
+        } catch {
+            print("⚠️ Failed to load obtained data: \(error)")
+            return self
+        }
+    }
+}
+
+extension MakeupVariant: CardDisplayable {
+    var cardImageURL: String? { imageURL }
+    var cardTitle: String { title ?? makeupCategory?.capitalized ?? slug }
+    var cardLabel: String { "" }
+    var cardStyle: String { style ?? "" }
+    var cardRarity: Int? { rarity }
+    var cardObtained: Int { obtained == true ? 1 : 0 }
+    var cardTotal: Int { 1 }
+    var cardHasUserData: Bool { obtained != nil }
+    var cardIsSquare: Bool { true }
+}
+
 // MARK: - User Progress Tracking
 
 struct ObtainedEureka: Codable, Identifiable {

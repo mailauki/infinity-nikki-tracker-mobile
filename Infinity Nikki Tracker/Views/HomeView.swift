@@ -34,6 +34,7 @@ enum CollectionKind: Hashable, CaseIterable, Identifiable {
 enum DetailSelection: Hashable {
     case outfit(OutfitSet)
     case eureka(EurekaSet)
+    case makeup(MakeupSet)
 }
 
 struct HomeView: View {
@@ -42,6 +43,7 @@ struct HomeView: View {
     @State private var selectedCollection: CollectionKind?
     @State private var selectedOutfit: OutfitSet?
     @State private var selectedEureka: EurekaSet?
+    @State private var selectedMakeup: MakeupSet?
     @State private var preferredCompactColumn = NavigationSplitViewColumn.detail
 
     // A single, always-present item binding for navigationDestination(item:). Two separate
@@ -53,6 +55,7 @@ struct HomeView: View {
             get: {
                 if let selectedOutfit { return .outfit(selectedOutfit) }
                 if let selectedEureka { return .eureka(selectedEureka) }
+                if let selectedMakeup { return .makeup(selectedMakeup) }
                 return nil
             },
             set: { newValue in
@@ -60,12 +63,19 @@ struct HomeView: View {
                 case .outfit(let outfit):
                     selectedOutfit = outfit
                     selectedEureka = nil
+                    selectedMakeup = nil
                 case .eureka(let eureka):
                     selectedEureka = eureka
                     selectedOutfit = nil
+                    selectedMakeup = nil
+                case .makeup(let makeup):
+                    selectedMakeup = makeup
+                    selectedOutfit = nil
+                    selectedEureka = nil
                 case nil:
                     selectedOutfit = nil
                     selectedEureka = nil
+                    selectedMakeup = nil
                 }
             }
         )
@@ -77,6 +87,7 @@ struct HomeView: View {
             set: { newValue in
                 selectedOutfit = nil
                 selectedEureka = nil
+                selectedMakeup = nil
                 selectedCollection = newValue
             }
         )
@@ -106,7 +117,7 @@ struct HomeView: View {
                 case .eureka:
                     EurekaView(selection: $selectedEureka)
                 case .makeup:
-                    MakeupView()
+                    MakeupView(selection: $selectedMakeup)
                 case .cloaks:
                     CloaksView()
                 case nil:
@@ -119,6 +130,8 @@ struct HomeView: View {
                     OutfitDetail(outfitSet: outfit)
                 case .eureka(let eureka):
                     EurekaDetail(eurekaSet: eureka)
+                case .makeup(let makeup):
+                    MakeupDetail(makeupSet: makeup)
                 }
             }
         } detail: {
