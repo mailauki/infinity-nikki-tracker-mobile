@@ -141,7 +141,7 @@ struct UserPreferences: Codable {
 
 // MARK: - Eureka Models
 
-struct EurekaSet: Codable, Identifiable {
+struct EurekaSet: Codable, Hashable, Identifiable {
     let id: Int
     let slug: String
     let title: String
@@ -182,7 +182,7 @@ struct EurekaSet: Codable, Identifiable {
     }
 }
 
-struct EurekaVariant: Codable, Identifiable {
+struct EurekaVariant: Codable, Hashable, Identifiable {
     let id: Int
     let slug: String
     let eurekaSet: String?  // Foreign key to eureka_sets (slug)
@@ -351,7 +351,7 @@ extension EurekaVariant: CardDisplayable {
 
 // MARK: - Outfit Models
 
-struct OutfitSet: Codable, Identifiable {
+struct OutfitSet: Codable, Hashable, Identifiable {
     let id: Int
     let slug: String
     let title: String
@@ -451,7 +451,7 @@ struct OutfitSet: Codable, Identifiable {
     }
 }
 
-struct OutfitVariant: Codable, Identifiable {
+struct OutfitVariant: Codable, Hashable, Identifiable {
     let id: Int
     let slug: String
     let altSlug: String?
@@ -508,7 +508,7 @@ struct OutfitCategory: Codable, Hashable, Identifiable {
     }
 }
 
-struct OutfitCarouselImage: Codable, Identifiable {
+struct OutfitCarouselImage: Codable, Hashable, Identifiable {
     let id: Int
     let imageURL: String
     let outfitSet: String

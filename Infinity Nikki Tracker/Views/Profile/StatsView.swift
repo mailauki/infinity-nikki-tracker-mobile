@@ -28,7 +28,7 @@ struct StatsView: View {
             VStack(spacing: 0) {
                 Picker("Collection", selection: $selectedCollection) {
                     ForEach(collections) { item in
-                        Image(systemName: item.icon)
+                        Text(item.label)
                             .tag(item)
                     }
                 }
@@ -48,7 +48,7 @@ struct StatsView: View {
         }
         .task { await fetchEureka() }
         .navigationTitle("Stats")
-//        .scrollContentBackground(.hidden)
+        .scrollContentBackground(.hidden)
         .background(Color.themeSurface)
     }
 

@@ -28,6 +28,7 @@ struct ProfileView: View {
     @State private var profileCounts: [String] = ["Items", "Following", "Followers"]
 
     @State private var showStats = false
+    @State private var isShowingMenu = false
 
     var body: some View {
         NavigationStack {
@@ -40,8 +41,8 @@ struct ProfileView: View {
             }
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    NavigationLink(destination: SettingsView()) {
-                        Image(systemName: "gear")
+                    Button("Open Navigation Menu", systemImage: "gear") {
+                        isShowingMenu = true
                     }
                 }
                 ToolbarItem(placement: .principal) {
@@ -52,6 +53,9 @@ struct ProfileView: View {
                     .pickerStyle(.segmented)
                     .frame(width: 160)
                 }
+            }
+            .sheet(isPresented: $isShowingMenu) {
+                SettingsView()
             }
         }
     }

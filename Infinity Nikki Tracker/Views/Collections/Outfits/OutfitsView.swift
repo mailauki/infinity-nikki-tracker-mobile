@@ -9,71 +9,65 @@ import SwiftUI
 import Supabase
 
 struct OutfitsView: View {
+    @Binding var selection: OutfitSet?
+
     @State private var outfitSets: [OutfitSet] = []
     @State private var categories: [OutfitCategory] = []
     @State private var isLoading = false
     @State private var errorMessage: String?
-    
+
     @AppStorage("outfitIsGrid") private var isGrid = true
-    
+
     // MARK: - Constants
-    
+
     let columns = [
         GridItem(.flexible(), spacing: 10),
         GridItem(.flexible(), spacing: 10)
     ]
-    
+
     // MARK: - Body
 
     var body: some View {
-        NavigationSplitView {
-            Group {
-                if isGrid {
-                    // Grid Layout View
-                    outfitGridView
-                } else {
-                    // List Layout View
-                    outfitListView
+        Group {
+            if isGrid {
+                // Grid Layout View
+                outfitGridView
+            } else {
+                // List Layout View
+                outfitListView
+            }
+        }
+        .overlay {
+            if isLoading && outfitSets.isEmpty {
+                ProgressView()
+            }
+        }
+        .task {
+            await fetchOutfits()
+        }
+        .navigationTitle("Outfits")
+        .scrollContentBackground(.hidden)
+        .background(Color.themeSurface)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    isGrid.toggle()
+                } label: {
+                    Image(systemName: isGrid ? "list.bullet" : "square.grid.2x2")
                 }
             }
-            .overlay {
-                if isLoading && outfitSets.isEmpty {
-                    ProgressView()
-                }
-            }
-            .task {
-                await fetchOutfits()
-            }
-            .navigationTitle("Outfits")
-            .scrollContentBackground(.hidden)
-            .background(Color.themeSurface)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        isGrid.toggle()
-                    } label: {
-                        Image(systemName: isGrid ? "list.bullet" : "square.grid.2x2")
-                    }
-                }
-            }
-#if os(macOS)
-            .navigationSplitViewColumnWidth(min: 180, ideal: 200)
-#endif
-        } detail: {
-            Text("Select a Outfit")
-                .navigationTitle("Outfits")
         }
     }
-    
+
     // MARK: - View Components
-    
+
     private var outfitListView: some View {
         ScrollView {
             AuthBanner(collectionLabel: "Outfits")
             LazyVStack(spacing: 10) {
                 ForEach(outfitSets) { outfitSet in
-                    NavigationLink {
-                        OutfitDetail(outfitSet: outfitSet)
+                    Button {
+                        selection = outfitSet
                     } label: {
                         CardView(item: outfitSet, layout: .row)
                     }.listRowBackground(Color.themeSurfaceContainerLow)
@@ -85,14 +79,14 @@ struct OutfitsView: View {
             await fetchOutfits()
         }
     }
-    
+
     private var outfitGridView: some View {
         ScrollView {
             AuthBanner(collectionLabel: "Outfits")
             LazyVGrid(columns: columns, spacing: 20) {
                 ForEach(outfitSets) { outfitSet in
-                    NavigationLink {
-                        OutfitDetail(outfitSet: outfitSet)
+                    Button {
+                        selection = outfitSet
                     } label: {
                         CardView(item: outfitSet)
                     }
@@ -104,9 +98,9 @@ struct OutfitsView: View {
             await fetchOutfits()
         }
     }
-    
+
     // MARK: - Data Methods
-    
+
     func fetchOutfits() async {
         isLoading = true
         errorMessage = nil
@@ -166,5 +160,7 @@ struct OutfitsView: View {
 
 }
 #Preview {
-    OutfitsView()
+    NavigationStack {
+        OutfitsView(selection: .constant(nil))
+    }
 }

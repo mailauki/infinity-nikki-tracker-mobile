@@ -9,73 +9,67 @@ import SwiftUI
 import Supabase
 
 struct EurekaView: View {
+    @Binding var selection: EurekaSet?
+
     @State private var eurekaSets: [EurekaSet] = []
     @State private var categories: [EurekaCategory] = []
     @State private var colors: [EurekaColor] = []
     @State private var isLoading = false
     @State private var errorMessage: String?
-    
+
     @AppStorage("eurekaIsGrid") private var isGrid = true
-    
+
     // MARK: - Constants
-    
+
     let columns = [
         GridItem(.flexible(), spacing: 10),
         GridItem(.flexible(), spacing: 10)
     ]
-    
-    
+
+
     // MARK: - Body
 
     var body: some View {
-        NavigationSplitView {
-            Group {
-                if isGrid {
-                    // Grid Layout View
-                    eurekaGridView
-                } else {
-                    // List Layout View
-                    eurekaListView
+        Group {
+            if isGrid {
+                // Grid Layout View
+                eurekaGridView
+            } else {
+                // List Layout View
+                eurekaListView
+            }
+        }
+        .overlay {
+            if isLoading && eurekaSets.isEmpty {
+                ProgressView()
+            }
+        }
+        .task {
+            await fetchEureka()
+        }
+        .navigationTitle("Eureka")
+        .scrollContentBackground(.hidden)
+        .background(Color.themeSurface)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    isGrid.toggle()
+                } label: {
+                    Image(systemName: isGrid ? "list.bullet" : "square.grid.2x2")
                 }
             }
-            .overlay {
-                if isLoading && eurekaSets.isEmpty {
-                    ProgressView()
-                }
-            }
-            .task {
-                await fetchEureka()
-            }
-            .navigationTitle("Eureka")
-            .scrollContentBackground(.hidden)
-            .background(Color.themeSurface)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        isGrid.toggle()
-                    } label: {
-                        Image(systemName: isGrid ? "list.bullet" : "square.grid.2x2")
-                    }
-                }
-            }
-#if os(macOS)
-            .navigationSplitViewColumnWidth(min: 180, ideal: 200)
-#endif
-        } detail: {
-            Text("Select a Eureka")
-                .navigationTitle("Eureka")
         }
     }
-    
+
     // MARK: - View Components
-    
+
     private var eurekaListView: some View {
         ScrollView {
             AuthBanner(collectionLabel: "Eureka")
             LazyVStack(spacing: 10) {
                 ForEach(eurekaSets) { eurekaSet in
-                    NavigationLink {
-                        EurekaDetail(eurekaSet: eurekaSet)
+                    Button {
+                        selection = eurekaSet
                     } label: {
                         CardView(item: eurekaSet, layout: .row)
                     }.listRowBackground(Color.themeSurfaceContainerLow)
@@ -87,14 +81,14 @@ struct EurekaView: View {
             await fetchEureka()
         }
     }
-    
+
     private var eurekaGridView: some View {
         ScrollView {
             AuthBanner(collectionLabel: "Eureka")
             LazyVGrid(columns: columns, spacing: 20) {
                 ForEach(eurekaSets) { eurekaSet in
-                    NavigationLink {
-                        EurekaDetail(eurekaSet: eurekaSet)
+                    Button {
+                        selection = eurekaSet
                     } label: {
                         CardView(item: eurekaSet)
                     }
@@ -106,9 +100,9 @@ struct EurekaView: View {
             await fetchEureka()
         }
     }
-    
+
     // MARK: - Data Methods
-    
+
     func fetchEureka() async {
         isLoading = true
         errorMessage = nil
@@ -209,5 +203,7 @@ struct EurekaView: View {
 }
 
 #Preview {
-    EurekaView()
+    NavigationStack {
+        EurekaView(selection: .constant(nil))
+    }
 }
