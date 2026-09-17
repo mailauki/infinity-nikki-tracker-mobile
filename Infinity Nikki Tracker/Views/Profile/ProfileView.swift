@@ -31,32 +31,30 @@ struct ProfileView: View {
     @State private var isShowingMenu = false
 
     var body: some View {
-        NavigationStack {
-            Group {
-                if showStats {
-                    StatsView()
-                } else {
-                    profileContent
+        Group {
+            if showStats {
+                StatsView()
+            } else {
+                profileContent
+            }
+        }
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button("Open Navigation Menu", systemImage: "gear") {
+                    isShowingMenu = true
                 }
             }
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Open Navigation Menu", systemImage: "gear") {
-                        isShowingMenu = true
-                    }
+            ToolbarItem(placement: .principal) {
+                Picker("View", selection: $showStats) {
+                    Text("Profile").tag(false)
+                    Text("Stats").tag(true)
                 }
-                ToolbarItem(placement: .principal) {
-                    Picker("View", selection: $showStats) {
-                        Text("Profile").tag(false)
-                        Text("Stats").tag(true)
-                    }
-                    .pickerStyle(.segmented)
-                    .frame(width: 160)
-                }
+                .pickerStyle(.segmented)
+                .frame(width: 160)
             }
-            .sheet(isPresented: $isShowingMenu) {
-                SettingsView()
-            }
+        }
+        .sheet(isPresented: $isShowingMenu) {
+            SettingsView()
         }
     }
 
@@ -104,9 +102,6 @@ struct ProfileView: View {
                 VStack(spacing: 4) {
                     Text(displayName)
                         .font(.headline)
-//                    Text("About Me")
-//                        .font(.subheadline)
-//                        .multilineTextAlignment(.center)
                 }
                 .frame(width: 250)
                 .clipped()
@@ -315,6 +310,8 @@ struct ProfileView: View {
 }
 
 #Preview {
-    ProfileView()
-        .environment(AppearanceManager.shared)
+    NavigationStack {
+        ProfileView()
+    }
+    .environment(AppearanceManager.shared)
 }

@@ -68,8 +68,11 @@ struct SettingsView: View {
             .toolbar {
                 // Done button to close the sheet easily
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") {
+                    Button {
                         dismiss()
+                    } label: {
+                        Image(systemName: "xmark")
+                            .accessibilityLabel("Close")
                     }
                 }
             }

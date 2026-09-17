@@ -9,8 +9,6 @@ import SwiftUI
 import Supabase
 
 struct MakeupView: View {
-    @Binding var selection: MakeupSet?
-
     @State private var makeupSets: [MakeupSet] = []
     @State private var categories: [MakeupCategory] = []
     @State private var isLoading = false
@@ -66,11 +64,11 @@ struct MakeupView: View {
             AuthBanner(collectionLabel: "Makeup")
             LazyVStack(spacing: 10) {
                 ForEach(makeupSets) { makeupSet in
-                    Button {
-                        selection = makeupSet
+                    NavigationLink {
+                        MakeupDetail(makeupSet: makeupSet)
                     } label: {
                         CardView(item: makeupSet, layout: .row)
-                    }.listRowBackground(Color.themeSurfaceContainerLow)
+                    }
                 }
             }
             .padding()
@@ -85,8 +83,8 @@ struct MakeupView: View {
             AuthBanner(collectionLabel: "Makeup")
             LazyVGrid(columns: columns, spacing: 20) {
                 ForEach(makeupSets) { makeupSet in
-                    Button {
-                        selection = makeupSet
+                    NavigationLink {
+                        MakeupDetail(makeupSet: makeupSet)
                     } label: {
                         CardView(item: makeupSet)
                     }
@@ -161,6 +159,6 @@ struct MakeupView: View {
 }
 #Preview {
     NavigationStack {
-        MakeupView(selection: .constant(nil))
+        MakeupView()
     }
 }

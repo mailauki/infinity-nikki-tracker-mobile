@@ -891,6 +891,118 @@ extension MakeupVariant: CardDisplayable {
     var cardIsSquare: Bool { true }
 }
 
+// MARK: - Momo Cloak Models
+
+struct MomoCloak: Codable, Hashable, Identifiable {
+    let id: Int
+    let slug: String
+    let title: String
+    let description: String?
+    let rarity: Int?
+    let style: String?     // Foreign key to styles table
+    let label: String?     // Foreign key to labels table
+    let location: String?  // Foreign key to locations table
+    let outfitSet: String? // Foreign key to outfit_sets (slug)
+    let imageURL: String?
+    let altImageURL: String?
+    let seasonCategory: String?  // Foreign key to season_categories
+    let seasons: String?         // Foreign key to seasons
+    let createdAt: String?
+    let updatedAt: String?
+    var obtained: Bool?  // User-specific tracking
+
+    func withObtained(_ obtained: Bool) -> MomoCloak {
+        MomoCloak(id: id, slug: slug, title: title, description: description, rarity: rarity, style: style, label: label, location: location, outfitSet: outfitSet, imageURL: imageURL, altImageURL: altImageURL, seasonCategory: seasonCategory, seasons: seasons, createdAt: createdAt, updatedAt: updatedAt, obtained: obtained)
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case id, slug, title, description, rarity, style, label, location, seasons, obtained
+        case outfitSet = "outfit_set"
+        case imageURL = "image_url"
+        case altImageURL = "alt_image_url"
+        case seasonCategory = "season_category"
+        case createdAt = "created_at"
+        case updatedAt = "updated_at"
+    }
+}
+
+extension MomoCloak {
+    // Shared PostgREST select used wherever momo_cloaks are fetched.
+    static let supabaseSelect = """
+    id,
+    slug,
+    title,
+    description,
+    rarity,
+    style,
+    label,
+    location,
+    outfit_set,
+    season_category,
+    seasons,
+    image_url,
+    alt_image_url,
+    updated_at
+    """
+}
+
+extension Array where Element == MomoCloak {
+    private struct ObtainedMomoCloakSlug: Codable {
+        let momoCloak: String
+        enum CodingKeys: String, CodingKey {
+            case momoCloak = "momo_cloak"
+        }
+    }
+
+    // Pages through obtained_momo_cloaks rows for a user and marks matching cloaks as obtained.
+    func applyingObtainedMomoCloaks(userId: UUID) async -> [MomoCloak] {
+        do {
+            var allRecords: [ObtainedMomoCloakSlug] = []
+            let pageSize = 1000
+            var from = 0
+            while true {
+                let page: [ObtainedMomoCloakSlug] = try await supabase
+                    .from("obtained_momo_cloaks")
+                    .select("momo_cloak")
+                    .eq("user_id", value: userId)
+                    .order("id", ascending: true)
+                    .range(from: from, to: from + pageSize - 1)
+                    .execute()
+                    .value
+                allRecords.append(contentsOf: page)
+                if page.count < pageSize { break }
+                from += pageSize
+            }
+
+            let obtainedSlugs = Set(allRecords.map { $0.momoCloak })
+
+            return map { cloak in
+                cloak.withObtained(obtainedSlugs.contains(cloak.slug))
+            }
+        } catch {
+            print("⚠️ Failed to load obtained data: \(error)")
+            return self
+        }
+    }
+}
+
+extension MomoCloak: CardDisplayable {
+    var cardImageURL: String? { imageURL }
+    var cardTitle: String { title }
+    var cardLabel: String { label ?? "" }
+    var cardStyle: String { style ?? "" }
+    var cardRarity: Int? { rarity }
+    var cardObtained: Int { obtained == true ? 1 : 0 }
+    var cardTotal: Int { 1 }
+    var cardHasUserData: Bool { obtained != nil }
+}
+
+extension MomoCloak: DetailDisplayable {
+    var detailDescription: String? { description }
+    var detailSeasons: String? { seasons }
+    var detailSeasonCategory: String? { seasonCategory }
+}
+
 // MARK: - User Progress Tracking
 
 struct ObtainedEureka: Codable, Identifiable {

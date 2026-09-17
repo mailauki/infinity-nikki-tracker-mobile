@@ -9,8 +9,6 @@ import SwiftUI
 import Supabase
 
 struct EurekaView: View {
-    @Binding var selection: EurekaSet?
-
     @State private var eurekaSets: [EurekaSet] = []
     @State private var categories: [EurekaCategory] = []
     @State private var colors: [EurekaColor] = []
@@ -68,11 +66,11 @@ struct EurekaView: View {
             AuthBanner(collectionLabel: "Eureka")
             LazyVStack(spacing: 10) {
                 ForEach(eurekaSets) { eurekaSet in
-                    Button {
-                        selection = eurekaSet
+                    NavigationLink {
+                        EurekaDetail(eurekaSet: eurekaSet)
                     } label: {
                         CardView(item: eurekaSet, layout: .row)
-                    }.listRowBackground(Color.themeSurfaceContainerLow)
+                    }
                 }
             }
             .padding()
@@ -87,8 +85,8 @@ struct EurekaView: View {
             AuthBanner(collectionLabel: "Eureka")
             LazyVGrid(columns: columns, spacing: 20) {
                 ForEach(eurekaSets) { eurekaSet in
-                    Button {
-                        selection = eurekaSet
+                    NavigationLink {
+                        EurekaDetail(eurekaSet: eurekaSet)
                     } label: {
                         CardView(item: eurekaSet)
                     }
@@ -204,6 +202,6 @@ struct EurekaView: View {
 
 #Preview {
     NavigationStack {
-        EurekaView(selection: .constant(nil))
+        EurekaView()
     }
 }

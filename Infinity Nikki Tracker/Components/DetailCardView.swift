@@ -10,82 +10,98 @@ import SwiftUI
 struct DetailCardView<Item: DetailDisplayable>: View {
     let item: Item
     var progress: Float = 0
-
+    @Environment(\.dismiss) private var dismiss
+    
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 10) {
-                AsyncImage(url: URL(string: item.cardImageURL ?? "")) { phase in
-                    if let image = phase.image {
-                        image
-                            .resizable()
-                            .scaledToFit()
-                    } else if phase.error != nil {
-                        Image(systemName: "photo.fill")
-                            .resizable()
-                            .frame(width: 60, height: 40)
-                            .foregroundStyle(.placeholder.opacity(0.5))
-                    } else {
-                        ProgressView()
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 10) {
+                    AsyncImage(url: URL(string: item.cardImageURL ?? "")) { phase in
+                        if let image = phase.image {
+                            image
+                                .resizable()
+                                .scaledToFit()
+                        } else if phase.error != nil {
+                            Image(systemName: "photo.fill")
+                                .resizable()
+                                .frame(width: 60, height: 40)
+                                .foregroundStyle(.placeholder.opacity(0.5))
+                        } else {
+                            ProgressView()
+                        }
                     }
-                }
-                .frame(width: 200, height: 200)
-
-                Text(item.cardTitle)
-                    .font(.title)
-                    .foregroundStyle(Color.themeOnSurface)
-
-                HStack {
-                    if let rarity = item.cardRarity {
-                        RarityStars(rarity: rarity, long: true)
-                            .foregroundColor(Color.themeSecondary)
-                    }
-
-                    Spacer()
-
-                    ProgressChip(progress: progress)
-                }
-
-                HStack {
-                    if !item.cardStyle.isEmpty {
-                        Text(item.cardStyle.capitalized).foregroundColor(Color.themePrimary)
-                    }
-
-                    Spacer()
-
-                    if !item.cardLabel.isEmpty {
-                        Chip(label: item.cardLabel)
-                    }
-                }
-
-                if item.detailSeasons != nil || item.detailSeasonCategory != nil {
+                    .frame(width: 200, height: 200)
+                    
+                    Text(item.cardTitle)
+                        .font(.title)
+                        .foregroundStyle(Color.themeOnSurface)
+                    
                     HStack {
-                        if let seasons = item.detailSeasons {
-                            Text(seasons).foregroundColor(Color.themePrimary)
+                        if let rarity = item.cardRarity {
+                            RarityStars(rarity: rarity, long: true)
+                                .foregroundColor(Color.themeSecondary)
                         }
-
+                        
                         Spacer()
-
-                        if let seasonCategory = item.detailSeasonCategory {
-                            Text(seasonCategory).foregroundColor(Color.themeOnSurfaceVariant)
+                        
+                        ProgressChip(progress: progress)
+                    }
+                    
+                    HStack {
+                        if !item.cardStyle.isEmpty {
+                            Text(item.cardStyle.capitalized).foregroundColor(Color.themePrimary)
+                        }
+                        
+                        Spacer()
+                        
+                        if !item.cardLabel.isEmpty {
+                            Chip(label: item.cardLabel)
                         }
                     }
+                    
+                    if item.detailSeasons != nil || item.detailSeasonCategory != nil {
+                        HStack {
+                            if let seasons = item.detailSeasons {
+                                Text(seasons).foregroundColor(Color.themePrimary)
+                            }
+                            
+                            Spacer()
+                            
+                            if let seasonCategory = item.detailSeasonCategory {
+                                Text(seasonCategory).foregroundColor(Color.themeOnSurfaceVariant)
+                            }
+                        }
+                    }
+                    
+                    if let ability = item.detailAbility {
+                        Chip(label: ability)
+                    }
+                    
+                    if let description = item.detailDescription {
+                        Text(description)
+                            .font(.body)
+                            .foregroundStyle(Color.themeOnSurfaceVariant)
+                    }
                 }
-
-                if let ability = item.detailAbility {
-                    Chip(label: ability)
-                }
-
-                if let description = item.detailDescription {
-                    Text(description)
-                        .font(.body)
-                        .foregroundStyle(Color.themeOnSurfaceVariant)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding()
+            }
+            .scrollContentBackground(.hidden)
+            .background(Color.themeSurface)
+            .navigationTitle("Details")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                // Done button to close the sheet easily
+                ToolbarItem(placement: .confirmationAction) {
+                    Button {
+                        dismiss()
+                    } label: {
+                        Image(systemName: "xmark")
+                            .accessibilityLabel("Close")
+                    }
                 }
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding()
         }
-        .scrollContentBackground(.hidden)
-        .background(Color.themeSurface)
     }
 }
 
