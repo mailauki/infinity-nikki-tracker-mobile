@@ -1003,6 +1003,113 @@ extension MomoCloak: DetailDisplayable {
     var detailSeasonCategory: String? { seasonCategory }
 }
 
+// MARK: - Season Models
+
+struct Season: Decodable, Hashable, Identifiable {
+    let id: Int
+    let slug: String
+    let title: String
+    let description: String?
+    let imageURL: String?
+    let altImageURL: String?
+    let location: String?  // Foreign key to locations (slug)
+    let locationTitle: String?
+    let useSeasonGroups: Bool
+    let createdAt: String?
+    let updatedAt: String?
+
+    private struct LocationRef: Codable { let title: String }
+
+    init(id: Int, slug: String, title: String, description: String?, imageURL: String?, altImageURL: String?, location: String?, locationTitle: String?, useSeasonGroups: Bool, createdAt: String?, updatedAt: String?) {
+        self.id = id
+        self.slug = slug
+        self.title = title
+        self.description = description
+        self.imageURL = imageURL
+        self.altImageURL = altImageURL
+        self.location = location
+        self.locationTitle = locationTitle
+        self.useSeasonGroups = useSeasonGroups
+        self.createdAt = createdAt
+        self.updatedAt = updatedAt
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decode(Int.self, forKey: .id)
+        slug = try c.decode(String.self, forKey: .slug)
+        title = try c.decode(String.self, forKey: .title)
+        description = try c.decodeIfPresent(String.self, forKey: .description)
+        imageURL = try c.decodeIfPresent(String.self, forKey: .imageURL)
+        altImageURL = try c.decodeIfPresent(String.self, forKey: .altImageURL)
+        location = try c.decodeIfPresent(String.self, forKey: .location)
+        useSeasonGroups = try c.decodeIfPresent(Bool.self, forKey: .useSeasonGroups) ?? false
+        createdAt = try c.decodeIfPresent(String.self, forKey: .createdAt)
+        updatedAt = try c.decodeIfPresent(String.self, forKey: .updatedAt)
+        locationTitle = try c.decodeIfPresent(LocationRef.self, forKey: .locationRef)?.title
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case id, slug, title, description, location
+        case imageURL = "image_url"
+        case altImageURL = "alt_image_url"
+        case useSeasonGroups = "use_season_groups"
+        case createdAt = "created_at"
+        case updatedAt = "updated_at"
+        case locationRef = "location_ref"
+    }
+}
+
+extension Season {
+    // Shared PostgREST select used wherever seasons are fetched, with the location's title joined in.
+    static let supabaseSelect = """
+    id,
+    slug,
+    title,
+    description,
+    location,
+    use_season_groups,
+    image_url,
+    alt_image_url,
+    updated_at,
+    location_ref:locations!seasons_location_fkey ( title )
+    """
+}
+
+struct SeasonCategory: Codable, Hashable, Identifiable {
+    var id: String { slug }
+    let categoryId: Int
+    let slug: String
+    let title: String
+    let imageURL: String?
+    let seasonGroup: String?  // Foreign key to season_groups (slug)
+    let createdAt: String?
+
+    enum CodingKeys: String, CodingKey {
+        case slug, title
+        case categoryId = "id"
+        case imageURL = "image_url"
+        case seasonGroup = "season_group"
+        case createdAt = "created_at"
+    }
+}
+
+struct SeasonGroup: Codable, Hashable, Identifiable {
+    var id: String { slug }
+    let groupId: Int
+    let slug: String
+    let title: String
+    let imageURL: String?
+    let createdAt: String?
+
+    enum CodingKeys: String, CodingKey {
+        case slug, title
+        case groupId = "id"
+        case imageURL = "image_url"
+        case createdAt = "created_at"
+    }
+}
+
 // MARK: - User Progress Tracking
 
 struct ObtainedEureka: Codable, Identifiable {
